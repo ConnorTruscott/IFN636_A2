@@ -1,0 +1,30 @@
+name: Runner smoke test
+
+on:
+  workflow_dispatch:            # manual trigger
+  push:
+    paths:
+      - .github/workflows/runner-smoke.yml
+
+jobs:
+  ping:
+    runs-on: [self-hosted, Linux, X64]   # target your EC2 runner
+    steps:
+      - name: Show runner info
+        run: |
+          echo "Hello from $(hostname)"
+          uname -a
+          whoami
+          pwd
+
+      - name: Create an output file
+        run: |
+          mkdir -p testout
+          echo "ok $(date)" > testout/ok.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-output
+          path: testout
+
