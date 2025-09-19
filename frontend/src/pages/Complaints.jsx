@@ -3,7 +3,7 @@ import axiosInstance from '../axiosConfig';
 import ComplaintForm from '../components/ComplaintForm';
 import ComplaintList from '../components/ComplaintList';
 import { useAuth } from '../context/AuthContext';
-
+ 
 const Complaints = () => {
   const { user } = useAuth();
   const [complaints, setComplaints] = useState([]);
