@@ -3,31 +3,38 @@ const ComplaintController = require('../controllers/complaintController')
 class ComplaintControllerProxy {
     constructor(controller){
         this.controller = controller;
+
     }
 
     async getComplaints(req, res){
         //Who can get what complaints?
-        return this.controller.getComplaints(req, res);
+        if (req.user.role === 'Admin'){
+            return this.controller.getAllComplaints(req, res);
+        } else{
+            return this.controller.getComplaints(req, res);
+        }
+        
     }
 
-    async addComplaints(req, res){
+    async addComplaint(req, res){
         //Assuming only students can get complaints
         if (req.user.role === 'Student'){
-            return this.controller.addComplaints(req, res);
+            return this.controller.addComplaint(req, res);
         }
         return res.status(403).json({message: "Only students can file complaints"});
     }
 
-    async updateComplaints(req, res){
+    async updateComplaint(req, res){
         //Assuming only staff and admin can update a complaint - i.e resolved, handing to a staff, etc
         if (req.user.role === 'Admin'||req.user.role === 'Staff'){
-            return this.controller.updateComplaints(req, res);
+            return this.controller.updateComplaint(req, res);
         }
         return res.status(403).json({message: "Unauthorized to update complaints"});
     }
 
     async deleteComplaint(req, res){
         //Only Admin can delete complaints
+        console.log('deleteComplaint called by:', req.user); //Debug
         if (req.user.role ==='Admin'){
             return this.controller.deleteComplaint(req, res);
         }
