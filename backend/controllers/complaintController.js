@@ -9,6 +9,15 @@ const getComplaints = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+//For Admin usage
+const getAllComplaints = async (req, res) => {
+  try {
+    const complaints = await Complaint.find().sort({ date: -1});
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({message: error.message});
+  }
+};
 
 // CREATE
 const addComplaint = async (req, res) => {
@@ -116,6 +125,7 @@ const deleteFeedback = async (req, res) => {
 
 module.exports = {
   getComplaints,
+  getAllComplaints,
   addComplaint,
   updateComplaint,
   deleteComplaint,

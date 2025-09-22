@@ -1,12 +1,25 @@
 const express = require('express');
-const { getComplaints, addComplaint, updateComplaint, deleteComplaint } = require('../controllers/complaintController');
+//const { getComplaints, addComplaint, updateComplaint, deleteComplaint } = require('../controllers/complaintController');
+//const complaintController = require('../controllers/complaintController');
+const complaintController = require('../design_patterns/complaintControllerProxy');
 const { protect } = require('../middleware/authMiddleware');
 const router = express.Router();
 const upload = require('../utils/upload');             
 const Complaint = require('../models/Complaint');
 
-router.route('/').get(protect, getComplaints).post(protect, addComplaint);
-router.route('/:id').put(protect, updateComplaint).delete(protect, deleteComplaint);
+//router.route('/').get(protect, getComplaints).post(protect, addComplaint);
+//router.route('/:id').put(protect, updateComplaint).delete(protect, deleteComplaint);
+
+//const complaintController = new ComplaintControllerProxy(ComplaintController);
+
+router.route('/').get(protect, (req, res) => complaintController.getComplaints(req, res)).post(protect, (req, res) => complaintController.addComplaint(req, res));
+router.route('/:id').put(protect, (req, res) => complaintController.updateComplaint(req, res)).delete(protect, (req, res) => complaintController.deleteComplaint(req, res));
+
+//Closed Complaints
+router.get('/closed', protect, (req, res) => complaintController.getClosedComplaints(req, res));
+
+//Feedback
+router.route('/:id/feedback').post(protect, (req, res) => complaintController.saveFeedback(req, res)).delete(protect, (req, res) => complaintController.deleteFeedback(req, res));
 
 // photo upload 
 router.post('/:id/photos', protect, upload.array('photos', 5), async (req, res) => {

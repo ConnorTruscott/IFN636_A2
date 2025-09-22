@@ -11,6 +11,11 @@ const userSchema = new mongoose.Schema({
     // address: { type: String },
     phone: { type: String, required: true, trim: true },
     campus: { type: String, required: true, enum: ['Garden Point', 'Kelvin Grove'] },
+    role: {
+        type: String,
+        enum: ['Student', 'Staff', 'Admin'],
+        default: 'Student'
+    },
 
 }, { timestamps: true 
 });
