@@ -106,3 +106,5 @@ Install and/or create accounts for:
 - [VS Code](https://code.visualstudio.com/)
 - [MongoDB Account](https://account.mongodb.com/account/login)
 - [GitHub Account](https://github.com/signup?source=login)
+
+---
