@@ -26,7 +26,7 @@ const createStaff = async (req, res) => {
 const listStaff = async (req, res) => {
     try{
         const staffList = await User.find({role:'Staff'});
-        res,json(staffList);
+        res.json(staffList);
     } catch (error){
         res.status(500).json({message: error.message});
     }

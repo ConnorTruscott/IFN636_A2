@@ -8,13 +8,25 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res) => {
-    const { studentNumber, name, email, password, phone, campus } = req.body; //new
+    const { studentNumber, name, email, password, phone, campus, role } = req.body; //new
     try {
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-        const user = await User.create({ studentNumber, name, email, password, phone, campus }); //with ,?
-        res.status(201).json({ id: user.id, studentNumber: user.studentNumber, name: user.name, email: user.email, phone: user.phone, campus: user.campus, token: generateToken(user.id) });
+        let finalRole = 'Student';
+
+        if (req.user && req.user.role ==='Admin' && role){
+            finalRole = role;
+        }
+
+        const userData = {name, email, password, phone, campus, role: finalRole};
+
+        if (studentNumber && finalRole === 'Student'){
+            userData.studentNumber = studentNumber;
+        }
+
+        const user = await User.create({ studentNumber, name, email, password, phone, campus, role: finalRole, }); //with ,?
+        res.status(201).json({ id: user.id, studentNumber: user.studentNumber, name: user.name, email: user.email, phone: user.phone, campus: user.campus, role: user.role, token: generateToken(user.id) });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
