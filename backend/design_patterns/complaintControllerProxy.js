@@ -17,6 +17,8 @@ class ComplaintControllerProxy {
     }
 
     async addComplaint(req, res){
+        //Debug log
+        console.log("Proxy addComplaint req.body:", req.body);
         //Assuming only students can get complaints
         if (req.user.role === 'Student'){
             return this.controller.addComplaint(req, res);
@@ -25,12 +27,34 @@ class ComplaintControllerProxy {
     }
 
     async updateComplaint(req, res){
-        //Assuming only staff and admin can update a complaint - i.e resolved, handing to a staff, etc
+        //Debug log
+        console.log("Proxy updateComplaint req.params.id:", req.params.id);
+        console.log("Proxy updateComplaint req.body:", req.body);
+        //Assuming only staff and admin can update every complaint - i.e resolved, handing to a staff, etc
         if (req.user.role === 'Admin'||req.user.role === 'Staff'){
             return this.controller.updateComplaint(req, res);
         }
-        return res.status(403).json({message: "Unauthorized to update complaints"});
+        //Student can only update the complaint they created
+    if (req.user.role === 'Student') {
+            // Student can edit their own complaint
+            const Complaint = require('../models/Complaint');
+            try {
+                const complaint = await Complaint.findById(req.params.id);
+                if (!complaint) {
+                    return res.status(404).json({ message: "Complaint not found" });
+                }
+                if (complaint.userId.toString() !== req.user.id) {
+                    return res.status(403).json({ message: "You can only update your own complaints" });
+                }
+                return this.controller.updateComplaint(req, res);
+            } catch (err) {
+                return res.status(500).json({ message: err.message });
+            }
+        }
+        
+        return res.status(403).json({ message: "Unauthorized to update complaints" });
     }
+        
 
     async deleteComplaint(req, res){
         //Only Admin can delete complaints

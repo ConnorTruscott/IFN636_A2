@@ -21,12 +21,16 @@ const getAllComplaints = async (req, res) => {
 
 // CREATE
 const addComplaint = async (req, res) => {
-  const { title, description, date } = req.body;
+  console.log("Headers:", req.headers["content-type"]);
+  console.log("req.body:", req.body);
+  const { title, category, description, location, date } = req.body;
   try {
     const complaint = await Complaint.create({
       userId: req.user.id,
       title,
+      category,
       description,
+      location,
       date,
       // status defaults in schema
     });
@@ -38,13 +42,15 @@ const addComplaint = async (req, res) => {
 
 // UPDATE
 const updateComplaint = async (req, res) => {
-  const { title, description, completed, date } = req.body;
+  const { title, category, description, location, completed, date } = req.body;
   try {
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
     complaint.title = title ?? complaint.title;
+    complaint.category = category ?? complaint.category;
     complaint.description = description ?? complaint.description;
+    complaint.location = location ?? complaint.location;
     if (typeof completed === 'boolean') complaint.completed = completed;
     complaint.date = date ?? complaint.date;
 

@@ -65,7 +65,9 @@ const ComplaintList = ({ complaints, setComplaints, setEditingComplaint }) => {
       {complaints.map((complaint) => (
         <div key={complaint._id} className="bg-gray-100 p-4 mb-4 rounded shadow">
           <h2 className="font-bold">{complaint.title}</h2>
+          <p className="text-sm text-gray-700">Category: {complaint.category || '—'}</p>
           <p>{complaint.description}</p>
+          <p className="text-sm text-gray-700">Location: {complaint.location || '—'}</p>
           <p className="text-sm text-gray-500">Date: {formatDate(complaint.date)}</p>
           <p className="text-sm text-gray-700">Status: {complaint.status || 'received'}</p>
 
