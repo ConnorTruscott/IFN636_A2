@@ -19,6 +19,17 @@ const getAllComplaints = async (req, res) => {
   }
 };
 
+// For staff to view complaints by catergry
+const getComplaintsByCategory = async (req, res) => {
+  try {
+    const category = req.params.category;
+    const complaints = await Complaint.find({ category: category });
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // CREATE
 const addComplaint = async (req, res) => {
   console.log("Headers:", req.headers["content-type"]);
@@ -132,6 +143,7 @@ const deleteFeedback = async (req, res) => {
 module.exports = {
   getComplaints,
   getAllComplaints,
+  getComplaintsByCategory,
   addComplaint,
   updateComplaint,
   deleteComplaint,
