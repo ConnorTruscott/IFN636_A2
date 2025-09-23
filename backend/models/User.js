@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
         enum: ['Student', 'Staff', 'Admin'],
         default: 'Student'
     },
+    department: {type: String},
 
 }, { timestamps: true 
 });
