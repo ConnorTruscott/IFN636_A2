@@ -10,6 +10,8 @@ class ComplaintControllerProxy {
         //Who can get what complaints?
         if (req.user.role === 'Admin'){
             return this.controller.getAllComplaints(req, res);
+        }if (req.user.role === 'Staff'){
+            return this.controller.getComplaintsByCategory(req, res);
         } else{
             return this.controller.getComplaints(req, res);
         }
