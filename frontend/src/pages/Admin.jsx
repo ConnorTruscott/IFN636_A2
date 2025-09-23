@@ -57,11 +57,17 @@ const AdminPage = () => {
                 value={newStaff.password}
                 onChange={(e) => setNewStaff({...newStaff, password: e.target.value})}
                 />
-                <input
-                placeholder="Department"
+                <select
                 value={newStaff.department}
                 onChange={(e) => setNewStaff({...newStaff, department: e.target.value})}
-                />
+                >
+                    <option value="">Select Department</option>
+                    <option value="Facilities & Maintenance">Facilities & Maintenance</option>
+                    <option value="Academic Issues">Academic Issues</option>
+                    <option value="Campus Services">Campus Services</option>
+                    <option value="Safety & Security">Safety & Security</option>
+                    <option value="Other">Other</option>
+                </select>
                 <button onClick={handleCreateStaff}>Create Staff</button>
             </section>
 
