@@ -13,7 +13,7 @@ const AdminPage = () => {
 
     const fetchStaff = async () => {
         try {
-            const {data} = await axiosInstance.get('api/admin/staff', {
+            const {data} = await axiosInstance.get('api/auth/admin/staff', {
                 headers: {Authorization: `Bearer ${user.token}`},
             });
             setStaff(data);
