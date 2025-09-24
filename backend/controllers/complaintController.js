@@ -1,4 +1,6 @@
 const Complaint = require('../models/Complaint');
+const { StudentFilterStrategy } = require('../design_patterns/StudentFilterStrategy');
+const { AdminSortByDateStrategy, AdminSortByStatusStrategy, AdminSortByCategoryStrategy} = require('../design_patterns/AdminFilterStrategy');
 
 // READ
 const getComplaints = async (req, res) => {
@@ -30,10 +32,49 @@ const getComplaintsByCategory = async (req, res) => {
   }
 };
 
+// Student: Complaint Filter by date 
+const getComplaintsSortedByDate = async (req, res, order) => {
+  try {
+    const strategy = new StudentFilterStrategy();
+    const complaints = await strategy.applyFilter(req, Complaint, order);
+    res.json(complaints);
+  } catch (error) {
+    console.error("Error in getComplaintsSortedByDate:", error);
+    res.status(500).json({ message: "Error sorting complaints" });
+  }
+};
+
+// Admin: Complaint Filter by date, status, category
+const getComplaintsSortedByAdmin = async (req, res, type, order) => {
+  try {
+    let strategy;
+
+    switch (type) {
+      case "date":
+        strategy = new AdminSortByDateStrategy();
+        break;
+      //case "status":
+        //strategy = new AdminSortByStatusStrategy();
+        //break;
+      case "category":
+        strategy = new AdminSortByCategoryStrategy();
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid sort type" });
+    }
+
+    const complaints = await strategy.applyFilter(req, Complaint, order);
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({ message: "Error sorting complaints" });
+  }
+};
+
+// Staff can add below:
+// Using 'getComplaintsSortedByStaff'
+
 // CREATE
 const addComplaint = async (req, res) => {
-  console.log("Headers:", req.headers["content-type"]);
-  console.log("req.body:", req.body);
   const { title, category, description, location, date } = req.body;
   try {
     const complaint = await Complaint.create({
@@ -42,7 +83,7 @@ const addComplaint = async (req, res) => {
       category,
       description,
       location,
-      date,
+      date: date ? new Date(date) : null,
       // status defaults in schema
     });
     res.status(201).json(complaint);
@@ -63,7 +104,7 @@ const updateComplaint = async (req, res) => {
     complaint.description = description ?? complaint.description;
     complaint.location = location ?? complaint.location;
     if (typeof completed === 'boolean') complaint.completed = completed;
-    complaint.date = date ?? complaint.date;
+    complaint.date = date ? new Date(date) : complaint.date;
 
     const updated = await complaint.save();
     res.json(updated);
@@ -150,4 +191,7 @@ module.exports = {
   getClosedComplaints,
   saveFeedback,
   deleteFeedback,
+  getComplaintsSortedByDate,
+  getComplaintsSortedByAdmin,
+  //getComplaintsSortedByStaff
 };
