@@ -11,7 +11,13 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // const response = await axiosInstance.post('/api/auth/login', formData);
+      // login(response.data);
       const response = await axiosInstance.post('/api/auth/login', formData);
+      const token = response.data?.token;
+      const role  = (response.data?.role ?? response.data?.user?.role ?? '').toString();
+      if (token) localStorage.setItem('token', token);
+      if (role)  localStorage.setItem('role', role);
       login(response.data);
       navigate('/complaints');
     } catch (error) {
