@@ -17,7 +17,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/auth', require('./routes/adminRoutes'));
+//app.use('/api/auth', require('./routes/adminRoutes'));
+app.use('/api', require('./routes/adminRoutes'));
 app.use('/api/complaints', require('./routes/complaintRoutes'));
 app.use('/api/feedback', require('./routes/feedbackRoutes'));
 
