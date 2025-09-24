@@ -7,7 +7,7 @@ const complaintSchema = new mongoose.Schema({
   description: { type: String },
   location: { type: String, required: true },
   completed: { type: Boolean, default: false },
-  date: { type: Date },
+  date: { type: Date, required: true },
   status: {
     type: String,
     enum: ['received', 'resolving', 'closed'],
