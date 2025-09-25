@@ -17,7 +17,7 @@ router.route('/').get(protect, (req, res) => complaintController.getComplaints(r
 router.route('/:id').put(protect, (req, res) => complaintController.updateComplaint(req, res)).delete(protect, (req, res) => complaintController.deleteComplaint(req, res));
 
 // Sorting for all users (student, admin, staff)
-router.get('/sort/:type', protect, (req, res) => complaintController.getComplaintsSorted(req, res));
+//router.get('/sort/:type', protect, (req, res) => complaintController.getComplaintsSorted(req, res));
 
 //Closed Complaints
 router.get('/closed', protect, (req, res) => complaintController.getClosedComplaints(req, res));
