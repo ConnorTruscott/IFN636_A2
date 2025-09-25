@@ -42,7 +42,7 @@ const protect = async (req, res, next) => {
  */
 const isStaff = (req, res, next) => {
     // Check if req.user exists and has a role (it should if 'protect' middleware ran successfully)
-    if (req.user && (req.user.role === 'staff' || req.user.role === 'admin')) {
+    if (req.user && (req.user.role === 'Staff' || req.user.role === 'Admin')) {
         next(); // User is staff or admin, proceed
     } else {
         // User is not authorized
