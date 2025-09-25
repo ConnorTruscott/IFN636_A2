@@ -96,6 +96,8 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
       <input
         type="date"
         value={formData.date}
+        required
+        max={new Date().toISOString().split("T")[0]}
         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
         className="w-full mb-4 p-2 border rounded"
       />
