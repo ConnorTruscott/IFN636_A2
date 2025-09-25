@@ -17,6 +17,15 @@ class NotificationService {
         this.observers.forEach(observer => observer.update(notification));
     }
 
+    complaintCreated(user, userName, complaintId){
+        this.notify({
+            type: "COMPLAINT_CREATED",
+            message: `A new complaint has been created by ${userName}.`,
+            recipiant: "Admin",
+            timestamp: new Date()
+        });
+    }
+
     complaintResolved(user, complaintId){
         this.notify({
             type: "COMPLAINT_RESOLVED",
