@@ -2,6 +2,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const notificationService = require('../design_patterns/NotificationService');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -30,6 +31,9 @@ const registerUser = async (req, res) => {
         }
 
         const user = await User.create( userData ); //with ,?
+
+        notificationService.userRegistered(user)
+
         res.status(201).json({ id: user.id, studentNumber: user.studentNumber, name: user.name, email: user.email, phone: user.phone, campus: user.campus, role: user.role, department: user.department, token: generateToken(user.id) });
     } catch (error) {
         res.status(500).json({ message: error.message });

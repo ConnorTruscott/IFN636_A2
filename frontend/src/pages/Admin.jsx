@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 const AdminPage = () => {
     const {user} = useAuth();
     const [staff, setStaff] = useState([]);
+    const [departments, setDepartments] = useState([]);
+    const [newDept, setNewDept] = useState('');
     const [newStaff, setNewStaff] = useState({name: '', email: '', password: '', role: 'Staff', department: ''});
 
     useEffect(() => {
@@ -36,6 +38,49 @@ const AdminPage = () => {
         }
     };
 
+    useEffect(() => {
+        const fetchDepartments = async () => {
+            try {
+                const {data} = await axiosInstance.get("/api/departments", {
+                    headers: {Authorization: `Bearer ${user.token}`},
+                });
+                setDepartments(data);
+            } catch (err) {
+                console.error("Failed to fetch departments", err);
+            }
+        };
+
+        fetchDepartments();
+    }, []);
+
+    const handleCreateDepartment = async () => {
+        if (!newDept) return;
+        try {
+            const {data} = await axiosInstance.post(
+                '/api/departments',
+                {name: newDept},
+                {headers: {Authorization: `Bearer ${user.token}`}}
+            );
+            setDepartments([...departments, data]);
+            setNewDept('')
+        } catch (err) {
+            console.error('Failed to create department', err);
+            alert('Could not create department');
+        }
+    };
+
+    const handleDeleteDepartment = async (id) => {
+        try {
+            await axiosInstance.delete(`/api/departments/${id}`, {
+                headers: {Authorization: `Bearer ${user.token}`},
+            });
+            setDepartments(departments.filter((d) => d._id!==id));
+        } catch (err) {
+            console.error('Failed to delete department', err);
+            alert('Could not delete department');
+        }
+    };
+
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">Admin Management</h1>
@@ -62,13 +107,32 @@ const AdminPage = () => {
                 onChange={(e) => setNewStaff({...newStaff, department: e.target.value})}
                 >
                     <option value="">Select Department</option>
-                    <option value="Facilities & Maintenance">Facilities & Maintenance</option>
-                    <option value="Academic Issues">Academic Issues</option>
-                    <option value="Campus Services">Campus Services</option>
-                    <option value="Safety & Security">Safety & Security</option>
-                    <option value="Other">Other</option>
+                    {departments.map((d) => (
+                        <option key={d._id} value={d.name}>
+                            {d.name}
+                        </option>
+                    ))}
                 </select>
                 <button onClick={handleCreateStaff}>Create Staff</button>
+            </section>
+
+            <section className='mb-6'>
+                <h2 className="text-xl font-semibold mb-2">Manage Departments</h2>
+                <input
+                placeholder="New Department Name"
+                value={newDept}
+                onChange={(e) => setNewDept(e.target.value)}
+                />
+                <button onClick={handleCreateDepartment}>Add Department</button>
+
+                <ul>
+                    {departments.map((d) => (
+                        <li key={d._id}>
+                            {d.name}
+                            <button onClick={() => handleDeleteDepartment(d._id)}>Delete</button>
+                        </li>
+                    ))}
+                </ul>
             </section>
 
             <section>

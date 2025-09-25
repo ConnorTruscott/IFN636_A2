@@ -1,6 +1,8 @@
 const Complaint = require('../models/Complaint');
-//const { StudentFilterStrategy } = require('../design_patterns/StudentFilterStrategy');
-//const { AdminSortByDateStrategy, AdminSortByStatusStrategy, AdminSortByCategoryStrategy} = require('../design_patterns/AdminFilterStrategy');
+const { StudentFilterStrategy } = require('../design_patterns/StudentFilterStrategy');
+const { AdminSortByDateStrategy, AdminSortByStatusStrategy, AdminSortByCategoryStrategy} = require('../design_patterns/AdminFilterStrategy');
+const notificationService = require('../design_patterns/NotificationService');
+const { compare } = require('bcrypt');
 
 // READ
 const getComplaints = async (req, res) => {
@@ -86,6 +88,7 @@ const addComplaint = async (req, res) => {
       date: date ? new Date(date) : null,
       // status defaults in schema
     });
+    notificationService.complaintCreated(req.user.id, req.user.name, complaint._id)
     res.status(201).json(complaint);
   } catch (error) {
     res.status(500).json({ message: error.message });
