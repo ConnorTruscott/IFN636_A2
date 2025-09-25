@@ -1,6 +1,6 @@
 const Complaint = require('../models/Complaint');
-const { StudentFilterStrategy } = require('../design_patterns/StudentFilterStrategy');
-const { AdminSortByDateStrategy, AdminSortByStatusStrategy, AdminSortByCategoryStrategy} = require('../design_patterns/AdminFilterStrategy');
+//const { StudentFilterStrategy } = require('../design_patterns/StudentFilterStrategy');
+//const { AdminSortByDateStrategy, AdminSortByStatusStrategy, AdminSortByCategoryStrategy} = require('../design_patterns/AdminFilterStrategy');
 
 // READ
 const getComplaints = async (req, res) => {
@@ -33,42 +33,42 @@ const getComplaintsByCategory = async (req, res) => {
 };
 
 // Student: Complaint Filter by date 
-const getComplaintsSortedByDate = async (req, res, order) => {
-  try {
-    const strategy = new StudentFilterStrategy();
-    const complaints = await strategy.applyFilter(req, Complaint, order);
-    res.json(complaints);
-  } catch (error) {
-    console.error("Error in getComplaintsSortedByDate:", error);
-    res.status(500).json({ message: "Error sorting complaints" });
-  }
-};
+//const getComplaintsSortedByDate = async (req, res, order) => {
+  //try {
+    //const strategy = new StudentFilterStrategy();
+    //const complaints = await strategy.applyFilter(req, Complaint, order);
+    //res.json(complaints);
+  //} catch (error) {
+    //console.error("Error in getComplaintsSortedByDate:", error);
+    //res.status(500).json({ message: "Error sorting complaints" });
+  //}
+//};
 
 // Admin: Complaint Filter by date, status, category
-const getComplaintsSortedByAdmin = async (req, res, type, order) => {
-  try {
-    let strategy;
+//const getComplaintsSortedByAdmin = async (req, res, type, order) => {
+  //try {
+    //let strategy;
 
-    switch (type) {
-      case "date":
-        strategy = new AdminSortByDateStrategy();
-        break;
+    //switch (type) {
+      //case "date":
+        //strategy = new AdminSortByDateStrategy();
+        //break;
       //case "status":
         //strategy = new AdminSortByStatusStrategy();
         //break;
-      case "category":
-        strategy = new AdminSortByCategoryStrategy();
-        break;
-      default:
-        return res.status(400).json({ message: "Invalid sort type" });
-    }
+      //case "category":
+        //strategy = new AdminSortByCategoryStrategy();
+        //break;
+      //default:
+        //return res.status(400).json({ message: "Invalid sort type" });
+    //}
 
-    const complaints = await strategy.applyFilter(req, Complaint, order);
-    res.json(complaints);
-  } catch (error) {
-    res.status(500).json({ message: "Error sorting complaints" });
-  }
-};
+    //const complaints = await strategy.applyFilter(req, Complaint, order);
+    //res.json(complaints);
+  //} catch (error) {
+    //res.status(500).json({ message: "Error sorting complaints" });
+  //}
+//};
 
 // Staff can add below:
 // Using 'getComplaintsSortedByStaff'
@@ -191,7 +191,7 @@ module.exports = {
   getClosedComplaints,
   saveFeedback,
   deleteFeedback,
-  getComplaintsSortedByDate,
-  getComplaintsSortedByAdmin,
+  //getComplaintsSortedByDate,
+  //getComplaintsSortedByAdmin,
   //getComplaintsSortedByStaff
 };

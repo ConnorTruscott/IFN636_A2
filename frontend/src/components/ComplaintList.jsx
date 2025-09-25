@@ -1,29 +1,29 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
-import { useState } from 'react';
+//import { useState } from 'react';
 
 const ComplaintList = ({ complaints, setComplaints, setEditingComplaint }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [order, setOrder] = useState("asc");
+  //const [order, setOrder] = useState("asc");
 
 // Filter by Date 
-  const handleSortByDate = async () => {
-    try {
-      const res = await axiosInstance.get(`/api/complaints/sort/date?order=${order}`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      setComplaints(res.data); // update complaintList
-    } catch (e) {
-      alert("Failed to sort complaints by date");
-    }
-  };
+  //const handleSortByDate = async () => {
+    //try {
+      //const res = await axiosInstance.get(`/api/complaints/sort/date?order=${order}`, {
+        //headers: { Authorization: `Bearer ${user.token}` },
+      //});
+      //setComplaints(res.data); // update complaintList
+    //} catch (e) {
+      //alert("Failed to sort complaints by date");
+    //}
+  //};
 
-  const toggleOrder = () => {
-    setOrder(order === "asc" ? "desc" : "asc");
-  };
+  //const toggleOrder = () => {
+    //setOrder(order === "asc" ? "desc" : "asc");
+  //};
 
   const handleDelete = async (id) => {
     try {
@@ -81,7 +81,7 @@ const ComplaintList = ({ complaints, setComplaints, setEditingComplaint }) => {
 
   return (
     <div>
-      {/* >>> Date Filter Button */}
+      {/*
       <div className="mb-4 flex gap-2 items-center">
         <select
           value={order}
@@ -99,6 +99,8 @@ const ComplaintList = ({ complaints, setComplaints, setEditingComplaint }) => {
           Apply Sorting
         </button>
       </div>
+      */}
+      
 
       {complaints.map((complaint) => (
         <div key={complaint._id} className="bg-gray-100 p-4 mb-4 rounded shadow">
