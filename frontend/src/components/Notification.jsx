@@ -1,0 +1,43 @@
+import { useState } from "react";
+
+    const Notification = ({ notifications }) => {
+        const [isOpen, setIsOpen] = useState(false);
+
+        //Show unread messages
+        const unread = notifications.filter((n) => !n.read);
+
+        return(
+            <div className="relative inline-block">
+                {/*Bell Icon*/}
+                <button onClick={() => setIsOpen(!isOpen)}
+                className="relative text-xl">
+                    🔔
+                    {unread.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">
+                            {unread.length}
+                        </span>
+                    )}
+                </button>
+
+                {/*Dropdown*/}
+                {isOpen && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white text-black rounded-lg shadow-lg z-50">
+                        <div className="p-2 border-b font-semibold">Notifications</div>
+                        <ul className="max-h-60 overflow-y-auto">
+                            {unread.length>0 ? (
+                                unread.map((n, i) => (
+                                    <li key={i} className="p-2 hover:bg-gray-100">
+                                        {n.message}
+                                    </li>
+                                ))
+                            ) : (
+                                <li className="p-2 text-gray-500">No new notifications</li>
+                            )}
+                        </ul>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    export default Notification;

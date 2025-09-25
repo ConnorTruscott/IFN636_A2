@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Notification from './Notification';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -9,6 +10,13 @@ const Navbar = () => {
     logout();
     navigate('/login');
   };
+
+  //Placeholder for testing purposes, delete later
+  const notifications = [
+    {message: "New complaint submitted", read: false},
+    {message: "Feedback received", read: false},
+    {message: "System update completed", read: true}
+  ];
 
   return (
     <nav className="bg-black text-white p-4 flex justify-between items-center">
@@ -23,6 +31,8 @@ const Navbar = () => {
             {user.role ==="Admin" && (
               <Link to="/admin" classname="mr-4">Admin Page</Link>
             )}
+
+            <Notification notifications={notifications} />
             <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded hover:bg-red-700">Logout</button>
           </>
         ) : (
