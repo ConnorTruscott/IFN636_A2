@@ -1,7 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axiosInstance from "../axiosConfig";
+//import User from "../../../backend/models/User";
+import { useAuth } from "../context/AuthContext";
 
-    const Notification = ({ notifications }) => {
+    const Notification = () => {
         const [isOpen, setIsOpen] = useState(false);
+        const [notifications, setNotifications] = useState([]);
+        const {user} = useAuth();
+
+        useEffect(() => {
+            const fetchNotifications = async () => {
+                try {
+                    const { data } = await axiosInstance.get("/api/notifications", {
+                        headers: {Authorization: `Bearer ${user.token}`},
+                    });
+                    setNotifications(data);
+                } catch (err) {
+                    console.error("Failed to fetch notifications", err);
+                }
+            };
+
+            fetchNotifications();
+            const interval = setInterval(fetchNotifications, 15000);
+            return () => clearInterval(interval);
+        }, []);
 
         //Show unread messages
         const unread = notifications.filter((n) => !n.read);

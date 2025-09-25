@@ -18,6 +18,9 @@ const createStaff = async (req, res) => {
 
         const savedStaff = await User.create({...newStaff.user, role: 'Staff', department});
 
+        const NotificationService = require('../design_patterns/NotificationService');
+        NotificationService.userRegistered(savedStaff);
+
         res.status(201).json(savedStaff);
     } catch (error){
         res.status(403).json({message: error.message});
