@@ -1,4 +1,3 @@
-// frontend/src/design_patterns/sortStrategy.js
 class SortStrategy { sort(list){ return list; } }
 
 export class TitleSort extends SortStrategy {

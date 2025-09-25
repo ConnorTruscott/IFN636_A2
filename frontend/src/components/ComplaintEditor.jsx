@@ -1,15 +1,14 @@
-// frontend/src/components/ComplaintEditor.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function ComplaintEditor({
-  value,                      // selected complaint
-  onSave, onClear, onDelete,  // handlers from parent
-  height = '44vh'
+  value, onSave, onClear, onDelete, height = '44vh',
+  categories = [], locations = []
 }) {
   const [form, setForm] = useState({
     title:'', category:'', location:'', description:'', status:'received', photos:[]
   });
   const [photosStr, setPhotosStr] = useState('');
+  const disabled = !value;
 
   useEffect(() => {
     if (!value) {
@@ -29,18 +28,26 @@ export default function ComplaintEditor({
     setPhotosStr(photos.join(', '));
   }, [value]);
 
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
+  const categoryOptions = useMemo(() => {
+    const s = new Set((categories || []).filter(Boolean));
+    if (form.category) s.add(form.category);
+    return Array.from(s).sort((a,b)=>a.localeCompare(b));
+  }, [categories, form.category]);
 
-  const handlePhotos = e => {
+  // Build location options = presets + the current value (so it shows even if not preset)
+  const locationOptions = useMemo(() => {
+    const s = new Set((locations || []).filter(Boolean));
+    if (form.location) s.add(form.location);
+    return Array.from(s).sort((a,b)=>a.localeCompare(b));
+  }, [locations, form.location]);
+
+  const change = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+  const changePhotos = e => {
     const raw = e.target.value;
     setPhotosStr(raw);
     const arr = raw.split(',').map(s => s.trim()).filter(Boolean);
-    setForm(prev => ({ ...prev, photos: arr }));
+    setForm(p => ({ ...p, photos: arr }));
   };
-
   const askDelete = () => {
     const reason = window.prompt('Please enter a reason for deletion:');
     if (!reason) return;
@@ -49,27 +56,53 @@ export default function ComplaintEditor({
 
   return (
     <div style={{ border:'1px solid #ddd', borderRadius:8, padding:12, height, overflowY:'auto' }}>
-      <h3 style={{ marginTop:0 }}>Edit Complaint Details</h3>
-      {!value && <div style={{ color:'#777', marginBottom:12 }}>Select a complaint in the list above.</div>}
+      <h3 style={{ margin:'0 0 8px 0' }}>Edit Complaint Details</h3>
+      {!value && <div style={{ color:'#777', marginBottom:12 }}>Select a complaint above.</div>}
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr', gap:12 }}>
-        <label>Title
-          <input name="title" value={form.title} onChange={handleChange} style={{ width:'100%' }} />
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+        <label style={{ gridColumn:'1 / span 2' }}>Title
+          <input name="title" value={form.title} onChange={change} style={{ width:'100%' }} disabled={disabled}/>
         </label>
+
         <label>Category
-          <input name="category" value={form.category} onChange={handleChange} style={{ width:'100%' }} />
+          <select
+            name="category"
+            value={form.category}
+            onChange={change}
+            disabled={disabled}
+            style={{ width:'100%' }}
+          >
+            <option value="">Select category</option>
+            {categoryOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
         </label>
+
         <label>Location
-          <input name="location" value={form.location} onChange={handleChange} style={{ width:'100%' }} />
+          <select
+            name="location"
+            value={form.location}
+            disabled
+            style={{ width:'100%', background:'#f8f8f8' }}
+          >
+            <option value="">Select location</option>
+            {locationOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
         </label>
-        <label>Description
-          <textarea name="description" rows={4} value={form.description} onChange={handleChange} style={{ width:'100%' }} />
+
+        <label style={{ gridColumn:'1 / span 2' }}>Description
+          <textarea name="description" rows={4} value={form.description} onChange={change} style={{ width:'100%' }} disabled={disabled}/>
         </label>
-        <label>Upload Photo (comma-separated URLs)
-          <input value={photosStr} onChange={handlePhotos} placeholder="https://... , https://..." style={{ width:'100%' }} />
+
+        <label style={{ gridColumn:'1 / span 2' }}>Upload Photo (comma-separated URLs)
+          <input value={photosStr} onChange={changePhotos} placeholder="https://... , https://..." style={{ width:'100%' }} disabled={disabled}/>
         </label>
+
         <label>Status
-          <select name="status" value={form.status} onChange={handleChange}>
+          <select name="status" value={form.status} onChange={change} disabled={disabled}>
             <option value="received">received</option>
             <option value="resolving">resolving</option>
             <option value="closed">closed</option>
@@ -78,9 +111,9 @@ export default function ComplaintEditor({
       </div>
 
       <div style={{ marginTop:16, display:'flex', gap:8 }}>
-        <button onClick={() => onSave?.(form)} disabled={!value}>Save</button>
+        <button onClick={() => onSave?.(form)} disabled={disabled}>Save</button>
         <button onClick={onClear}>Clear</button>
-        <button onClick={askDelete} disabled={!value} style={{ color:'#b00020' }}>Delete</button>
+        <button onClick={askDelete} disabled={disabled} style={{ color:'#b00020' }}>Delete</button>
       </div>
     </div>
   );

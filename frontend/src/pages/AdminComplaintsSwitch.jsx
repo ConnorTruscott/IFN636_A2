@@ -1,4 +1,3 @@
-// frontend/src/pages/AdminComplaintsSwitch.jsx
 import { useAuth } from '../context/AuthContext';
 import AdminDashboard from './AdminDashboard';
 import Complaints from './Complaints';

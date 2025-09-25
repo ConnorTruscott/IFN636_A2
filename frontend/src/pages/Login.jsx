@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../axiosConfig';
+import http from '../services/http';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -11,17 +11,14 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // const response = await axiosInstance.post('/api/auth/login', formData);
-      // login(response.data);
-      const response = await axiosInstance.post('/api/auth/login', formData);
-      const token = response.data?.token;
-      const role  = (response.data?.role ?? response.data?.user?.role ?? '').toString();
-      if (token) localStorage.setItem('token', token);
-      if (role)  localStorage.setItem('role', role);
-      login(response.data);
+      const { data } = await http.post('/api/auth/login', formData);
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.role)  localStorage.setItem('role', data.role);
+      login(data);
       navigate('/complaints');
     } catch (error) {
-      alert('Login failed. Please try again.');
+      const msg = error?.response?.data?.message || 'Login failed. Please try again.';
+      alert(msg);
     }
   };
 

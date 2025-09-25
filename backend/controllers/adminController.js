@@ -2,6 +2,10 @@ const User = require('../models/User');
 const {Admin} = require('../models/UserRoles');
 const AdminProxy = require('../design_patterns/adminProxy');
 const Complaint = require('../models/Complaint');
+const Category = require('../models/Category');
+const PRESET_LOCATIONS = require('../config/locations');
+
+
 
 const createStaff = async (req, res) => {
     try{
@@ -43,6 +47,19 @@ const getAllComplaints = async (_req, res) => {
   }
 };
 
+// Admin meta for dropdowns
+const getComplaintMeta = async (_req, res) => {
+  try {
+    const categoriesDocs = await Category.find().sort({ name: 1 });
+    const categories = categoriesDocs.map(c => c.name);
+    const locations = PRESET_LOCATIONS;
+    res.json({ categories, locations });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 // get single complaint by id
 const adminGetComplaintById = async (req, res) => {
   try {
@@ -57,14 +74,14 @@ const adminGetComplaintById = async (req, res) => {
 // update complaint (basic fields incl. status/photos)
 const adminUpdateComplaint = async (req, res) => {
   try {
-    const { title, category, description, location, status, photos, date } = req.body;
+    const { title, category, description, status, photos, date } = req.body;
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
     if (title !== undefined) complaint.title = title;
     if (category !== undefined) complaint.category = category;
     if (description !== undefined) complaint.description = description;
-    if (location !== undefined) complaint.location = location;
+    // DO NOT update complaint.location here (admin cannot change location)
     if (status !== undefined) complaint.status = status;
     if (Array.isArray(photos)) complaint.photos = photos;
     if (date !== undefined) complaint.date = date;
@@ -93,12 +110,14 @@ const adminDeleteComplaint = async (req, res) => {
   }
 };
 
+
+
 module.exports = {
   createStaff,
   listStaff,
-  // admin complaints 
   getAllComplaints,
   adminGetComplaintById,
   adminUpdateComplaint,
   adminDeleteComplaint,
+  getComplaintMeta,
 };
