@@ -40,7 +40,8 @@ const pathMap = {
   Complaint: "/complaints",
   Feedback: "/feedback",
   Profile: "/profile",
-  Dashboard: "/dashboard",
+  Staff: "/admin",
+  Dashboard: "/complaints",
   Analytics: "/admin/analytics"
 };
 
