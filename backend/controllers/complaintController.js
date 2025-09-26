@@ -23,6 +23,7 @@ const getAllComplaints = async (req, res) => {
   }
 };
 
+
 // For staff to view complaints by catergry
 const getComplaintsByCategory = async (req, res) => {
   try {
