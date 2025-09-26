@@ -11,9 +11,12 @@ import Feedback from './pages/Feedback';
 
 // Import the dashboards for roles
 import AdminDashboard from './pages/AdminDashboard';
-import StaffDashboard from './pages/StaffDashboard';
 
+import AdminComplaintsSwitch from './pages/AdminComplaintsSwitch';
+import AdminPerformanceAnalytics from './pages/AdminPerformanceAnalytics';
+import StaffDashboard from './pages/StaffDashboard';
 import { useAuth } from './context/AuthContext';
+
 
 function App() {
   const { user } = useAuth();
@@ -53,6 +56,15 @@ function App() {
         <Route
           path="/admin-dashboard"
           element={role === "admin" ? <AdminDashboard /> : <Navigate to="/" />}
+        />
+
+        <Route
+          path="/admin/analytics"
+          element={<AdminPerformanceAnalytics />}
+        />
+        <Route
+          path="/admin"
+          element={user?.role === 'Admin' ? <AdminPage /> : <Navigate to="/home" />}
         />
       </Routes>
     </Router>

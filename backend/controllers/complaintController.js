@@ -107,6 +107,7 @@ const addComplaint = async (req, res) => {
       description,
       location,
       date: date ? new Date(date) : null,
+      statusTimestamps: { received: new Date() }
       // status defaults in schema
     });
     notificationService.complaintCreated(req.user.id, req.user.name, complaint._id)
@@ -137,7 +138,38 @@ const updateComplaint = async (req, res) => {
   }
 };
 
-//update complaints by staff
+// Update complaint status for admin
+const updateComplaintStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const complaint = await Complaint.findById(id);
+    if (!complaint) {
+      return res.status(404).json({ message: 'Complaint not found' });
+    }
+
+    // Record times
+    if (status === "received") {
+      complaint.statusTimestamps.received = new Date();
+    }
+    if (status === "resolving") {
+      complaint.statusTimestamps.resolving = new Date();
+    }
+    if (status === "closed") {
+      complaint.statusTimestamps.closed = new Date();
+    }
+
+    complaint.status = status;
+    const updated = await complaint.save();
+    res.json(updated);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update complaints by staff
 const updateComplaintStatusByStaff = async (req, res) => {
     const { status } = req.body;
     const complaintId = req.params.id;
@@ -177,6 +209,7 @@ const updateComplaintStatusByStaff = async (req, res) => {
     }
 };
 
+
 // DELETE
 const deleteComplaint = async (req, res) => {
   try {
@@ -213,7 +246,7 @@ const saveFeedback = async (req, res) => {
     complaint.feedback = complaint.feedback || {};
 
     if (text !== undefined) {
-      complaint.feedback.text = String(text);
+      complaint.feedback.text = String(text).trim();;
     }
 
     if (rating !== undefined) {
@@ -251,6 +284,7 @@ module.exports = {
   getComplaintsByCategory,
   addComplaint,
   updateComplaint,
+  updateComplaintStatus,
   updateComplaintStatusByStaff,
   deleteComplaint,
   getClosedComplaints,

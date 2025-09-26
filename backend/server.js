@@ -5,6 +5,7 @@ const path = require('path');
 const connectDB = require('./config/db');
 const notificationService = require('./design_patterns/NotificationService');
 const {AdminObserver, UserObserver, StaffObserver} = require('./design_patterns/NotificationObservers');
+const analyticsRoutes = require('./routes/analyticsRoute');
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ app.use('/api/complaints', require('./routes/complaintRoutes'));
 app.use('/api/feedback', require('./routes/feedbackRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/departments', require('./routes/departmentRoutes'));
-
+app.use('/api/analytics', analyticsRoutes);
 
 // Export the app object for testing or start server if run directly
 if (require.main === module) {
