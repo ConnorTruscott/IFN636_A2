@@ -1,14 +1,25 @@
+// routes/staffRoutes.js
+
 const express = require('express');
 const router = express.Router();
-// Import the entire controller object to match the calling convention in your example
-const staffController = require('../controllers/staffController');
-const { protect, isStaff } = require('../middleware/authMiddleware'); // Middleware to protect routes and check for staff role
+const { protect, isStaff } = require('../middleware/authMiddleware');
 
-// GET all complaints assigned to the staff member.
-// This follows the pattern of wrapping the controller call in an anonymous function.
-router.route('/complaints').get(protect, isStaff, (req, res) => staffController.getAssignedComplaints(req, res));
+// Step 1: Import the ENTIRE controller object first
+const complaintController = require('../controllers/complaintController');
 
-// UPDATE a specific complaint's status.
-router.route('/complaints/:id').put(protect, isStaff, (req, res) => staffController.updateComplaintStatus(req, res));
+// Step 2: DEBUGGING - Log the entire object to see what's inside
+console.log('Available functions from complaintController:', complaintController);
+
+// Step 3: Destructure the functions you need from the object
+const { 
+    getComplaintsByCategory, 
+    updateComplaintStatusByStaff 
+} = complaintController;
+
+// GET complaints for the staff member's category/department
+router.route('/complaints').get(protect, isStaff, getComplaintsByCategory);
+
+// UPDATE a specific complaint's status
+router.route('/complaints/:id').put(protect, isStaff, updateComplaintStatusByStaff);
 
 module.exports = router;
