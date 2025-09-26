@@ -4,11 +4,19 @@ const Complaint = require('../models/Complaint');
 const notificationService = require('../design_patterns/NotificationService');
 const { compare } = require('bcrypt');
 
+const User = require('../models/User');
+//const { StudentFilterStrategy } = require('../design_patterns/StudentFilterStrategy');
+//const { AdminSortByDateStrategy, AdminSortByStatusStrategy, AdminSortByCategoryStrategy} = require('../design_patterns/AdminFilterStrategy');
+const notificationService = require('../design_patterns/NotificationService');
+const { compare } = require('bcrypt');
+
+
 // READ
 const getComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({ userId: req.user.id });
     res.json(complaints);
+    console.log('hi');
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -26,12 +34,24 @@ const getAllComplaints = async (req, res) => {
 
 // For staff to view complaints by catergry
 const getComplaintsByCategory = async (req, res) => {
+  console.log("Attempting to get complaints for staff member's department.");
   try {
-    const category = req.params.category;
-    const complaints = await Complaint.find({ category: category });
-    res.json(complaints);
+      const staffDepartment = req.user.department;
+
+      if (!staffDepartment) {
+          // If the staff user has not been assigned a department by an admin.
+          return res.status(403).json({ message: "Access denied: You are not assigned to a department." });
+      }
+      console.log(`Fetching complaints for department: ${staffDepartment}`);
+      const complaints = await Complaint.find({ category: staffDepartment })
+          .populate('userId', 'name email') // Fetches the name and email of the user who created the complaint.
+          .sort({ date: -1 });
+
+      res.json(complaints);
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+      console.error("Error fetching assigned complaints:", error.message);
+      res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -117,6 +137,46 @@ const updateComplaint = async (req, res) => {
   }
 };
 
+//update complaints by staff
+const updateComplaintStatusByStaff = async (req, res) => {
+    const { status } = req.body;
+    const complaintId = req.params.id;
+
+    // Validate the incoming status
+    const allowedStatuses = ['received', 'resolving', 'closed'];
+    if (!status || !allowedStatuses.includes(status)) {
+        return res.status(400).json({ message: `Invalid status. Please use one of: ${allowedStatuses.join(', ')}` });
+    }
+
+    try {
+        const staffDepartment = req.user.department;
+        if (!staffDepartment) {
+            return res.status(403).json({ message: "Access denied: You are not assigned to a department." });
+        }
+
+        const complaint = await Complaint.findById(complaintId);
+        if (!complaint) {
+            return res.status(404).json({ message: "Complaint not found." });
+        }
+
+        // SECURITY CHECK: Ensures staff can only modify complaints in their own department.
+        if (complaint.category !== staffDepartment) {
+            return res.status(403).json({ message: "Forbidden: You can only update complaints within your own department." });
+        }
+
+        // Update the status and completion fields
+        complaint.status = status;
+        complaint.completed = (status === 'closed'); // A shorter way to write the if/else
+
+        const updatedComplaint = await complaint.save();
+        res.json(updatedComplaint);
+
+    } catch (error) {
+        console.error("Error updating complaint status:", error.message);
+        res.status(500).json({ message: "Server Error" });
+    }
+};
+
 // DELETE
 const deleteComplaint = async (req, res) => {
   try {
@@ -191,6 +251,7 @@ module.exports = {
   getComplaintsByCategory,
   addComplaint,
   updateComplaint,
+  updateComplaintStatusByStaff,
   deleteComplaint,
   getClosedComplaints,
   saveFeedback,
