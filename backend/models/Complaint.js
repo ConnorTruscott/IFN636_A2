@@ -13,11 +13,16 @@ const complaintSchema = new mongoose.Schema({
     enum: ['received', 'resolving', 'closed'],
     default: 'received',
   },
+  statusTimestamps: {
+    received: { type: Date },   
+    resolving: { type: Date },  
+    closed: { type: Date }      
+  },
   photos: [{ type: String }],
   feedback: {
     text: { type: String, default: '' },
     rating: { type: Number, min: 1, max: 5 },
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Complaint', complaintSchema);

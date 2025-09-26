@@ -71,7 +71,7 @@ const Feedback = () => {
         text: d.text ?? '',
         rating: d.rating === '' ? undefined : Number(d.rating),
       };
-      const res = await axiosInstance.put(`/api/feedback/${id}`, body, {
+      const res = await axiosInstance.post(`/api/complaints/${id}/feedback`, body, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setItems((arr) => arr.map((c) => (c._id === id ? res.data : c)));

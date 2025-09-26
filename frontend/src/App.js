@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminComplaintsSwitch from './pages/AdminComplaintsSwitch';
 import {useAuth} from './context/AuthContext';
+import AdminPerformanceAnalytics from './pages/AdminPerformanceAnalytics';
 
 function App() {
   const {user} = useAuth();
@@ -34,6 +35,10 @@ function App() {
           path="/dashboard"
           element={role === "admin" ? <AdminDashboard /> : <Navigate to="/" />}
         />
+        <Route
+          path="/admin/analytics"
+          element={<AdminPerformanceAnalytics />}
+        />       
         <Route path="/admin" element={user?.role === 'Admin' ? <AdminPage /> : <Navigate to='/home' />} />
       </Routes>
     </Router>
