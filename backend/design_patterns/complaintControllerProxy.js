@@ -7,12 +7,15 @@ class ComplaintControllerProxy {
     }
 
     async getComplaints(req, res){
+        console.log('hi3');
         //Who can get what complaints?
         if (req.user.role === 'Admin'){
             return this.controller.getAllComplaints(req, res);
         }if (req.user.role === 'Staff'){
+            console.log('hi Staff fetch');
             return this.controller.getComplaintsByCategory(req, res);
         } else{
+            console.log('hi2');
             return this.controller.getComplaints(req, res);
         }
         

@@ -50,6 +50,6 @@ const isStaff = (req, res, next) => {
     }
 };
 
-module.exports = {protect};
+module.exports = {protect, isStaff};
 
 // Export both middleware functions so they can be imported in your route files.
