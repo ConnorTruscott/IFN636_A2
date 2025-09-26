@@ -36,11 +36,7 @@ if (require.main === module) {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-<<<<<<< Updated upstream
 const adminObserver = new AdminObserver();
 notificationService.subscribe(adminObserver);
 
 module.exports = app;
-=======
-module.exports = app;
->>>>>>> Stashed changes

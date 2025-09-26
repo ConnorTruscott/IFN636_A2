@@ -11,16 +11,14 @@ import Feedback from './pages/Feedback';
 
 // Import the dashboards for roles
 import AdminDashboard from './pages/AdminDashboard';
-
-import AdminComplaintsSwitch from './pages/AdminComplaintsSwitch';
-import AdminPerformanceAnalytics from './pages/AdminPerformanceAnalytics';
 import StaffDashboard from './pages/StaffDashboard';
-import { useAuth } from './context/AuthContext';
+import AdminPerformanceAnalytics from './pages/AdminPerformanceAnalytics';
+import AdminPage from './pages/Admin'; // 1. ADD THIS MISSING IMPORT
 
+import { useAuth } from './context/AuthContext';
 
 function App() {
   const { user } = useAuth();
-  // Using a single, normalized role variable is cleaner
   const role = (user?.role || '').toLowerCase();
 
   return (
@@ -36,35 +34,34 @@ function App() {
         <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/feedback" element={user ? <Feedback /> : <Navigate to="/login" />} />
         
-        {/* Role-Specific Routing for a central "complaints" path */}
+        {/* Role-Specific Routing */}
         <Route 
           path="/complaints"
           element={
-            role === 'admin' ? <AdminDashboard /> : // Admins go to their dashboard
-            role === 'staff' ? <StaffDashboard /> : // Staff go to their dashboard
-            <Complaints /> // Students see the standard complaint form/list
+            role === 'admin' ? <AdminDashboard /> :
+            role === 'staff' ? <StaffDashboard /> :
+            <Complaints />
           }
         />
-
-        {/* Dedicated route for the staff dashboard */}
         <Route 
           path="/staff-dashboard" 
           element={role === 'staff' ? <StaffDashboard /> : <Navigate to="/login" />} 
         />
 
-        {/* Dedicated route for the admin dashboard */}
+        {/* --- Admin Routes --- */}
         <Route
           path="/admin-dashboard"
           element={role === "admin" ? <AdminDashboard /> : <Navigate to="/" />}
         />
-
         <Route
           path="/admin/analytics"
-          element={<AdminPerformanceAnalytics />}
+          // 2. PROTECT THIS ROUTE
+          element={role === 'admin' ? <AdminPerformanceAnalytics /> : <Navigate to="/" />}
         />
         <Route
           path="/admin"
-          element={user?.role === 'Admin' ? <AdminPage /> : <Navigate to="/home" />}
+          // 3. FIX THE LOGIC AND REDIRECT
+          element={role === 'admin' ? <AdminPage /> : <Navigate to="/" />}
         />
       </Routes>
     </Router>
