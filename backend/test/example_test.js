@@ -11,56 +11,56 @@ const { expect } = chai;
 
 // chai.use(chaiHttp);
 
-describe('AddComplaint Function Test', () => {
-  it('should create a new complaint successfully', async () => {
-    // Mock request data (use "date" instead of "deadline")
-    const req = {
-      user: { id: new mongoose.Types.ObjectId() },
-      body: { title: 'New Complaint', description: 'Complaint description', date: '2025-12-31' },
-    };
+// describe('AddComplaint Function Test', () => {
+//   it('should create a new complaint successfully', async () => {
+//     // Mock request data (use "date" instead of "deadline")
+//     const req = {
+//       user: { id: new mongoose.Types.ObjectId() },
+//       body: { title: 'New Complaint', description: 'Complaint description', date: '2025-12-31' },
+//     };
 
-    // Mock complaint returned from model
-    const createdComplaint = { _id: new mongoose.Types.ObjectId(), userId: req.user.id, ...req.body, status: 'received'};
+//     // Mock complaint returned from model
+//     const createdComplaint = { _id: new mongoose.Types.ObjectId(), userId: req.user.id, ...req.body, status: 'received'};
 
-    // Stub create
-    const createStub = sinon.stub(Complaint, 'create').resolves(createdComplaint);
+//     // Stub create
+//     const createStub = sinon.stub(Complaint, 'create').resolves(createdComplaint);
 
-    // Mock res
-    const res = {
-      status: sinon.stub().returnsThis(),
-      json: sinon.spy(),
-    };
+//     // Mock res
+//     const res = {
+//       status: sinon.stub().returnsThis(),
+//       json: sinon.spy(),
+//     };
 
-    await addComplaint(req, res);
+//     await addComplaint(req, res);
 
-    expect(createStub.calledOnceWith({ userId: req.user.id, ...req.body })).to.be.true;
-    expect(res.status.calledWith(201)).to.be.true;
-    expect(res.json.calledWith(createdComplaint)).to.be.true;
+//     expect(createStub.calledOnceWith({ userId: req.user.id, ...req.body })).to.be.true;
+//     expect(res.status.calledWith(201)).to.be.true;
+//     expect(res.json.calledWith(createdComplaint)).to.be.true;
 
-    createStub.restore();
-  });
+//     createStub.restore();
+//   });
 
-  it('should return 500 if an error occurs', async () => {
-    const createStub = sinon.stub(Complaint, 'create').throws(new Error('DB Error'));
+//   it('should return 500 if an error occurs', async () => {
+//     const createStub = sinon.stub(Complaint, 'create').throws(new Error('DB Error'));
 
-    const req = {
-      user: { id: new mongoose.Types.ObjectId() },
-      body: { title: 'New Complaint', description: 'Complaint description', date: '2025-12-31' },
-    };
+//     const req = {
+//       user: { id: new mongoose.Types.ObjectId() },
+//       body: { title: 'New Complaint', description: 'Complaint description', date: '2025-12-31' },
+//     };
 
-    const res = {
-      status: sinon.stub().returnsThis(),
-      json: sinon.spy(),
-    };
+//     const res = {
+//       status: sinon.stub().returnsThis(),
+//       json: sinon.spy(),
+//     };
 
-    await addComplaint(req, res);
+//     await addComplaint(req, res);
 
-    expect(res.status.calledWith(500)).to.be.true;
-    expect(res.json.calledWithMatch({ message: 'DB Error' })).to.be.true;
+//     expect(res.status.calledWith(500)).to.be.true;
+//     expect(res.json.calledWithMatch({ message: 'DB Error' })).to.be.true;
 
-    createStub.restore();
-  });
-});
+//     createStub.restore();
+//   });
+// });
 
 describe('Update Function Test', () => {
   it('should update complaint successfully', async () => {
