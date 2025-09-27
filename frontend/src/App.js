@@ -6,8 +6,8 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
-import Complaints from './pages/Complaints';
 import Feedback from './pages/Feedback';
+import StudentDashboard from './pages/StudentDashboard';
 
 // Import the dashboards for roles
 import AdminDashboard from './pages/AdminDashboard';
@@ -40,7 +40,7 @@ function App() {
           element={
             role === 'admin' ? <AdminDashboard /> :
             role === 'staff' ? <StaffDashboard /> :
-            <Complaints />
+            <StudentDashboard />
           }
         />
         <Route 
