@@ -16,9 +16,6 @@ const Complaint = require('../models/Complaint');
 router.route('/').get(protect, (req, res) => complaintController.getComplaints(req, res)).post(protect, (req, res) => complaintController.addComplaint(req, res));
 router.route('/:id').put(protect, (req, res) => complaintController.updateComplaint(req, res)).delete(protect, (req, res) => complaintController.deleteComplaint(req, res));
 
-// Sorting for all users (student, admin, staff)
-//router.get('/sort/:type', protect, (req, res) => complaintController.getComplaintsSorted(req, res));
-
 //Closed Complaints
 router.get('/closed', protect, (req, res) => complaintController.getClosedComplaints(req, res));
 

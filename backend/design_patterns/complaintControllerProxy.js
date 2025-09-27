@@ -95,35 +95,6 @@ class ComplaintControllerProxy {
         return res.status(403).json({message: "Only Admins can delete feedback"})
     }
 
-    // Sorting
-    //async getComplaintsSorted(req, res) {
-    //try {
-        //const type = req.query.type || "date";
-        //const order = req.query.order === "desc" ? -1 : 1;
-
-    // Student--Date
-    //if (req.user.role === 'Student') {
-        //if (type !== 'date') {
-        //return res.status(403).json({ message: "Students can only sort by date" });
-      //}
-      //return this.controller.getComplaintsSortedByDate(req, res, order);
-    //}
-
-    // Admin--Date, Status, Category
-    //if (req.user.role === 'Admin') {
-        //return this.controller.getComplaintsSortedByAdmin(req, res, type, order);
-    //}
-
-    // Staff
-    //if (req.user.role === 'Staff') {
-        //return this.controller.getComplaintsSortedByStaff(req, res, type, order);
-    //}
-    //return res.status(403).json({ message: "Unauthorized to sort complaints" });
-  //} catch (err) {
-    //console.error("Proxy sorting error:", err);
-    //return res.status(500).json({ message: "Error sorting complaints" });
-  //}
-//}
 }
 
 module.exports = new ComplaintControllerProxy(ComplaintController);
