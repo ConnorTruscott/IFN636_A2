@@ -12,23 +12,25 @@ const {
 const router = express.Router();
 
 // Staff management
-router.route('/admin/staff')
+router.route('/staff')
   .get(protect, listStaff)
   .post(protect, createStaff);
 
-// Complaints (admin)
-router.get('/admin/complaints', protect, getAllComplaints);
-router.get('/admin/complaints/:id', protect, adminGetComplaintById);
-router.put('/admin/complaints/:id', protect, adminUpdateComplaint);
-router.delete('/admin/complaints/:id', protect, adminDeleteComplaint);
-
 // Meta (categories from DB + preset locations)
-router.get('/admin/complaints/meta', protect, getComplaintMeta);
+router.get('/complaints/meta', protect, getComplaintMeta);
+
+// Complaints (admin)
+router.get('/complaints', protect, getAllComplaints);
+router.get('/complaints/:id', protect, adminGetComplaintById);
+router.put('/complaints/:id', protect, adminUpdateComplaint);
+router.delete('/complaints/:id', protect, adminDeleteComplaint);
+
+
 
 // Category CRUD (admin manages categories)
-router.get('/admin/categories', protect, listCategories);
-router.post('/admin/categories', protect, createCategory);
-router.put('/admin/categories/:id', protect, updateCategory);
-router.delete('/admin/categories/:id', protect, deleteCategory);
+router.get('/categories', protect, listCategories);
+router.post('/categories', protect, createCategory);
+router.put('/categories/:id', protect, updateCategory);
+router.delete('/categories/:id', protect, deleteCategory);
 
 module.exports = router;

@@ -28,7 +28,7 @@ app.use('/api/feedback', require('./routes/feedbackRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/departments', require('./routes/departmentRoutes'));
 app.use('/api/analytics', analyticsRoutes);
-app.use('/api/staff', staffRoutes); // <-- 2. ADD THIS LINE
+app.use('/api/staff', staffRoutes);
 
 // Export the app object for testing or start server if run directly
 if (require.main === module) {
