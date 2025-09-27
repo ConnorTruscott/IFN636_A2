@@ -89,6 +89,7 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
             {dept.name}
           </option>
         ))}
+        <option value="Other">Other</option>
       </select>
       <label className="block text-gray-700 font-semibold mb-1">Description</label>
       <input
