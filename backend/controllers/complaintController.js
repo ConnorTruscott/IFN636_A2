@@ -188,6 +188,72 @@ const getClosedComplaints = async (req, res) => {
   }
 };
 
+
+// GET FEEDBACKS (Student / Staff / Admin)
+const getFeedbacks = async (req, res) => {
+  try {
+    if (req.user.role.toLowerCase() === 'student') {
+      // Student can only view their feedback 
+      const complaints = await Complaint.find({
+        userId: req.user.id,
+        "feedback.text": { $exists: true }
+      });
+
+      return res.json(
+        complaints.map(c => ({
+          _id: c._id,
+          complaintTitle: c.title,
+          text: c.feedback?.text,
+          rating: c.feedback?.rating
+        }))
+      );
+    }
+
+    if (req.user.role.toLowerCase() === 'staff') {
+      console.log("DEBUG STAFF:", req.user); 
+      // Staff con only view the fedback related to their department
+      const complaints = await Complaint.find({
+        category: req.user.department,   
+        "feedback.text": { $exists: true }
+      }).populate('userId', 'name email'); 
+
+      return res.json(
+        complaints.map(c => ({
+          _id: c._id,
+          complaintTitle: c.title,
+          studentName: c.userId?.name,
+          text: c.feedback?.text,
+          rating: c.feedback?.rating
+        }))
+      );
+    }
+
+    if (req.user.role.toLowerCase() === 'admin') {
+      // Admin can view all feedback
+      const complaints = await Complaint.find({
+        "feedback.text": { $exists: true }
+      });
+
+      return res.json(
+        complaints.map(c => ({
+          _id: c._id,
+          complaintTitle: c.title,
+          text: c.feedback?.text,
+          rating: c.feedback?.rating
+        }))
+      );
+    }
+
+    return res.status(403).json({ message: "Unauthorized" });
+
+  } catch (error) {
+    console.error("Error fetching feedbacks:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 // SAVE/UPDATE FEEDBACK
 const saveFeedback = async (req, res) => {
   try {
@@ -242,4 +308,5 @@ module.exports = {
   getClosedComplaints,
   saveFeedback,
   deleteFeedback,
+  getFeedbacks
 };

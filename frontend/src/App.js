@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Feedback from './pages/Feedback';
 import StudentDashboard from './pages/StudentDashboard';
+import StaffFeedback from "./pages/StaffFeedback";
 
 // Import the dashboards for roles
 import AdminDashboard from './pages/AdminDashboard';
@@ -32,7 +33,20 @@ function App() {
 
         {/* Protected Routes (require login) */}
         <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
-        <Route path="/feedback" element={user ? <Feedback /> : <Navigate to="/login" />} />
+
+         {/* Feedback Routes */}
+        <Route
+          path="/feedback"
+            element={
+            user ? (
+            role === 'staff' ? <StaffFeedback /> : 
+            role === 'student' ? <Feedback /> : 
+            <Navigate to="/" />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
         
         {/* Role-Specific Routing */}
         <Route 

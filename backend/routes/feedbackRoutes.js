@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const {
-  getClosedComplaints,
+  getFeedbacks,
   saveFeedback,
   deleteFeedback,
 } = require('../controllers/complaintController');
 
-router.get('/', protect, getClosedComplaints);
+router.get('/', protect, getFeedbacks);
 router.put('/:id', protect, saveFeedback);
 router.delete('/:id', protect, deleteFeedback);
 
