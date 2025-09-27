@@ -1,8 +1,8 @@
 import http from './http';
 
 // Overview table
-export const adminGetComplaints = ({ sort } = {}) =>
-  http.get('/api/admin/complaints', { params: { sort } }).then(r => r.data);
+export const adminGetComplaints = () =>
+  http.get('/api/admin/complaints').then(r => r.data);
 
 // Load one complaint for the editor
 export const adminGetComplaint = (id) =>
