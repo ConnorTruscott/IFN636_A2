@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminComplaintTable from '../components/AdminComplaintTable';
 import ComplaintEditor from '../components/ComplaintEditor';
 import {
@@ -8,10 +8,6 @@ import {
   adminDeleteComplaint,
   adminGetComplaintMeta,
 } from '../services/adminApi';
-import {
-  SortContext, DateSort, TitleSort, CategorySort, LocationSort,
-  StudentSort, StaffSort, StatusSort
-} from '../design_patterns/sortStrategy';
 
 const UPPER_H = '44vh';
 const LOWER_H = '44vh';
@@ -23,14 +19,13 @@ export default function AdminDashboard() {
   const [activeSort, setActiveSort] = useState('date');
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
-  const sortCtx = useMemo(() => new SortContext(new DateSort()), []);
 
-  const load = async () => {
+  const load = async (sortKey = activeSort) => {
     setLoading(true);
     setErr('');
     try {
-      const data = await adminGetComplaints();
-      setAll(applySort(data, activeSort, sortCtx));
+      const data = await adminGetComplaints({ sort: sortKey });
+      setAll(data);
     } catch (e) {
       console.error(e);
       setErr('Failed to load complaints.');
@@ -46,36 +41,35 @@ export default function AdminDashboard() {
         .map(x => (x?.[key] ?? '').toString().trim())
         .filter(Boolean)
     );
-    return Array.from(s).sort((a,b)=>a.localeCompare(b));
+    return Array.from(s).sort((a, b) => a.localeCompare(b));
   };
 
   useEffect(() => {
     (async () => {
-      await load();
+      await load('date');
       try {
         const m = await adminGetComplaintMeta();
         const categories = (m?.categories ?? []).filter(Boolean);
-        const locations  = (m?.locations  ?? []).filter(Boolean);
+        const locations = (m?.locations ?? []).filter(Boolean);
 
-        // Fallback: if backend returns empty, derive from current list
         const fallbackCategories = categories.length ? categories : uniqueFromList(all, 'category');
-        const fallbackLocations  = locations.length  ? locations  : uniqueFromList(all, 'location');
+        const fallbackLocations = locations.length ? locations : uniqueFromList(all, 'location');
 
         setMeta({ categories: fallbackCategories, locations: fallbackLocations });
       } catch (e) {
         console.warn('Failed to load meta, deriving from list');
         setMeta({
           categories: uniqueFromList(all, 'category'),
-          locations:  uniqueFromList(all, 'location'),
+          locations: uniqueFromList(all, 'location'),
         });
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onSort = (key) => {
+  const onSort = async (key) => {
     setActiveSort(key);
-    setAll(prev => applySort(prev, key, sortCtx));
+    await load(key);
   };
 
   const onRowClick = async (row, metaAction) => {
@@ -139,18 +133,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-}
-
-function applySort(list, key, ctx) {
-  switch (key) {
-    case 'title':         ctx.setStrategy(new TitleSort()); break;
-    case 'category':      ctx.setStrategy(new CategorySort()); break;
-    case 'location':      ctx.setStrategy(new LocationSort()); break;
-    case 'student':       ctx.setStrategy(new StudentSort()); break;
-    case 'assignedStaff': ctx.setStrategy(new StaffSort()); break;
-    case 'status':        ctx.setStrategy(new StatusSort()); break;
-    case 'date':
-    default:              ctx.setStrategy(new DateSort()); break;
-  }
-  return ctx.execute(list);
 }

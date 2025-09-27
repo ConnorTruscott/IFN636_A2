@@ -1,8 +1,8 @@
 import http from './http';
 
 // Overview table
-export const adminGetComplaints = () =>
-  http.get('/api/admin/complaints').then(r => r.data);
+export const adminGetComplaints = ({ sort } = {}) =>
+  http.get('/api/admin/complaints', { params: { sort } }).then(r => r.data);
 
 // Load one complaint for the editor
 export const adminGetComplaint = (id) =>
@@ -20,7 +20,7 @@ export const adminDeleteComplaint = (id, reason) =>
 export const adminGetComplaintMeta = () =>
   http.get('/api/admin/complaints/meta').then(r => r.data);
 
-//Categories CRUD 
+// Categories CRUD
 export const adminListCategories = () =>
   http.get('/api/admin/categories').then(r => r.data);
 
