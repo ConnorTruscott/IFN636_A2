@@ -5,6 +5,21 @@ import axiosInstance from '../axiosConfig';
 const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditingComplaint }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({ title: '', category: '', description: '', location: '', date: '' });
+  const [departments, setDepartments] = useState([]);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const {data} = await axiosInstance.get('/api/departments', {
+          headers: {Authorization: `Bearer ${user.token}`},
+        });
+        setDepartments(data);
+      } catch (err) {
+        console.error('Failed to fetch departments', err);
+      }
+    };
+    fetchDepartments();
+  }, [user]);
 
   const categories = [
     "Facilities & Maintenance",
@@ -69,9 +84,11 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
         className="w-full mb-4 p-2 border rounded"
       >
         <option value="">Select category</option>
-        {categories.map((cat, index) => (
-          <option key={index} value={cat}>{cat}</option>
-      ))}
+        {departments.map((dept) => (
+          <option key={dept._id} value={dept.name}>
+            {dept.name}
+          </option>
+        ))}
       </select>
       <label className="block text-gray-700 font-semibold mb-1">Description</label>
       <input
