@@ -2,9 +2,9 @@ const User = require('../models/User');
 const { Admin } = require('../models/UserRoles');
 const AdminProxy = require('../design_patterns/adminProxy');
 const Complaint = require('../models/Complaint');
-const Category = require('../models/Category');
+const Department = require('../models/Department');
 const PRESET_LOCATIONS = require('../config/locations');
-const CATEGORY_DEFAULTS = require('../config/categories'); // <-- add this
+const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy'); 
 
 const createStaff = async (req, res) => {
   try {
@@ -77,65 +77,105 @@ const updateStaffDepartment = async (req, res) => {
 // list all complaints (newest first) — populate student name only
 const getAllComplaints = async (_req, res) => {
   try {
-    const complaints = await Complaint.find()
+    // Load complaints + student
+    const rows = await Complaint.find()
       .sort({ date: -1, createdAt: -1 })
-      .populate('userId', 'fullname name'); // student name
+      .populate('userId', 'fullname name') // student
+      .lean();
 
-    res.json(complaints);
+    // Enrich each complaint with assignedStaffName
+    const result = await Promise.all(rows.map(async (r) => {
+      let assignedStaffName = '';
+
+      // If your schema has assignedStaff and data is present, try populate-on-demand
+      if (r.assignedStaff) {
+        const staff = await User.findById(r.assignedStaff, 'fullname name').lean();
+        if (staff) {
+          assignedStaffName = staff.fullname || staff.name || '';
+        }
+      }
+
+      // Fallback: find any staff in this complaint's department (category)
+      if (!assignedStaffName && r.category) {
+        const staff = await User.findOne(
+          { role: 'Staff', department: r.category },
+          'fullname name'
+        ).lean();
+        if (staff) {
+          assignedStaffName = staff.fullname || staff.name || '';
+        }
+      }
+
+      const studentName = r.userId?.fullname || r.userId?.name || '';
+      return { ...r, studentName, assignedStaffName };
+    }));
+
+    res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Admin meta for dropdowns
-// Merge DB + defaults, dedupe, sort A→Z (case-insensitive), keep "Other" last.
+
+
+
 const getComplaintMeta = async (_req, res) => {
   try {
-    const docs = await Category.find().sort({ name: 1 });
+    const docs = await Department.find().sort({ name: 1 });
 
-    const dbNames = docs
-      .map(c => (c?.name ?? '').toString().trim())
+    const raw = (docs || [])
+      .map(d => (d?.name ?? '').toString().trim())
       .filter(Boolean);
 
-    // merge with defaults and unique
-    const merged = Array.from(new Set([
-      ...dbNames,
-      ...CATEGORY_DEFAULTS
-    ]));
+    const unique = Array.from(new Set(raw));
+    const ensured = unique.some(n => n.toLowerCase() === 'other')
+      ? unique
+      : [...unique, 'Other'];
 
-    // sort (case-insensitive) with "Other" last
-    const withoutOther = merged
-      .filter(s => s.toLowerCase() !== 'other')
+    const withoutOther = ensured
+      .filter(n => n.toLowerCase() !== 'other')
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-    const hasOther = merged.some(s => s.toLowerCase() === 'other');
-    const categories = hasOther ? [...withoutOther, 'Other'] : withoutOther;
+    const categories = [...withoutOther, 'Other'];
 
-    const locations = PRESET_LOCATIONS; // admin cannot edit these
+    const locations = PRESET_LOCATIONS;
     res.json({ categories, locations });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
 };
 
-// get single complaint by id — include student name (and keep shape consistent)
+// get single complaint by id — include studentName & assignedStaffName
 const adminGetComplaintById = async (req, res) => {
   try {
-    const c = await Complaint.findById(req.params.id)
-      .populate('userId', 'fullname name');
+    const r = await Complaint.findById(req.params.id)
+      .populate('userId', 'fullname name')
+      .lean();
 
-    if (!c) return res.status(404).json({ message: 'Complaint not found' });
+    if (!r) return res.status(404).json({ message: 'Complaint not found' });
 
-    const obj = c.toObject();
-    obj.studentName = obj.userId?.fullname || obj.userId?.name || '';
-    // assignedStaff not part of schema currently
-    obj.assignedStaffName = obj.assignedStaffName || '';
-    res.json(obj);
+    let assignedStaffName = '';
+
+    if (r.assignedStaff) {
+      const staff = await User.findById(r.assignedStaff, 'fullname name').lean();
+      if (staff) assignedStaffName = staff.fullname || staff.name || '';
+    }
+
+    if (!assignedStaffName && r.category) {
+      const staff = await User.findOne(
+        { role: 'Staff', department: r.category },
+        'fullname name'
+      ).lean();
+      if (staff) assignedStaffName = staff.fullname || staff.name || '';
+    }
+
+    const studentName = r.userId?.fullname || r.userId?.name || '';
+    res.json({ ...r, studentName, assignedStaffName });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// update complaint (basic fields incl. status)
+
 const adminUpdateComplaint = async (req, res) => {
   try {
     const { title, category, description, status, date } = req.body;
@@ -148,8 +188,6 @@ const adminUpdateComplaint = async (req, res) => {
     if (status !== undefined) complaint.status = status;
     if (date !== undefined) complaint.date = date;
 
-    // admin does not change location; assigned staff not in schema
-
     const updated = await complaint.save();
     res.json(updated);
   } catch (error) {
@@ -157,7 +195,6 @@ const adminUpdateComplaint = async (req, res) => {
   }
 };
 
-// delete complaint (requires reason in body)
 const adminDeleteComplaint = async (req, res) => {
   try {
     const { reason } = req.body || {};
