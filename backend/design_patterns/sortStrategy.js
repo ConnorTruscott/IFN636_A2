@@ -1,59 +1,39 @@
-// Interface
 class SortStrategy {
-  sortSpec() {
-    return { date: -1 }; // default newest first
+  compare(_a,_b){ return 0; }
+  execute(list){ return Array.isArray(list) ? [...list].sort((a,b)=>this.compare(a,b)) : []; }
+}
+
+const s = v => (v==null ? '' : String(v).trim());
+const cmp = (a,b) => s(a).localeCompare(s(b), undefined, { sensitivity:'base' });
+const ms  = v => { const t = new Date(v||0).getTime(); return isFinite(t) ? t : 0; };
+
+class DateSort      extends SortStrategy { compare(a,b){ return ms(b.date||b.createdAt) - ms(a.date||a.createdAt); } }
+class TitleSort     extends SortStrategy { compare(a,b){ return cmp(a.title, a.title===b.title? b.title : b.title); } } // safe
+class CategorySort  extends SortStrategy { compare(a,b){ return cmp(a.category, b.category); } }
+class LocationSort  extends SortStrategy { compare(a,b){ return cmp(a.location, b.location); } }
+class StudentSort   extends SortStrategy {
+  compare(a,b){
+    const an = a.studentName || a?.userId?.fullname || a?.userId?.name;
+    const bn = b.studentName || b?.userId?.fullname || b?.userId?.name;
+    return cmp(an,bn);
   }
 }
+class StaffSort     extends SortStrategy { compare(a,b){ return cmp(a.assignedStaffName, b.assignedStaffName); } }
+class StatusSort    extends SortStrategy { compare(a,b){ return cmp(a.status, b.status); } }
 
-// Concrete strategies (aligned to your table columns)
-class DateSort extends SortStrategy {
-  sortSpec() { return { date: -1, createdAt: -1 }; }
-}
+class SortContext { constructor(strategy){ this.strategy = strategy; } setStrategy(s){ this.strategy = s; } execute(list){ return this.strategy.execute(list); } }
 
-class TitleSort extends SortStrategy {
-  sortSpec() { return { title: 1, date: -1 }; }
-}
-
-class CategorySort extends SortStrategy {
-  sortSpec() { return { category: 1, date: -1 }; }
-}
-
-class LocationSort extends SortStrategy {
-  sortSpec() { return { location: 1, date: -1 }; }
-}
-
-class StatusSort extends SortStrategy {
-  sortSpec() { return { status: 1, date: -1 }; }
-}
-
-// You can extend these later for Student/Assigned Staff
-// once those fields are persisted/denormalized for sorting in Mongo.
-
-class SortContext {
-  constructor(strategy = new DateSort()) {
-    this.strategy = strategy;
-  }
-  setStrategy(strategy) { this.strategy = strategy; }
-  spec() { return this.strategy.sortSpec(); }
-}
-
-function makeStrategy(key) {
-  switch ((key || '').toLowerCase()) {
+const makeStrategy = (key) => {
+  switch (key){
     case 'title': return new TitleSort();
     case 'category': return new CategorySort();
     case 'location': return new LocationSort();
+    case 'student': return new StudentSort();
+    case 'assignedStaff': return new StaffSort();
     case 'status': return new StatusSort();
     case 'date':
     default: return new DateSort();
   }
-}
-
-module.exports = {
-  SortContext,
-  DateSort,
-  TitleSort,
-  CategorySort,
-  LocationSort,
-  StatusSort,
-  makeStrategy,
 };
+
+module.exports = { SortContext, makeStrategy, DateSort, TitleSort, CategorySort, LocationSort, StudentSort, StaffSort, StatusSort };

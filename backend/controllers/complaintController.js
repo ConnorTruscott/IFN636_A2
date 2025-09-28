@@ -196,15 +196,17 @@ const getFeedbacks = async (req, res) => {
       // Student can only view their feedback 
       const complaints = await Complaint.find({
         userId: req.user.id,
-        "feedback.text": { $exists: true }
+        status: 'closed'
       });
 
       return res.json(
         complaints.map(c => ({
           _id: c._id,
-          complaintTitle: c.title,
-          text: c.feedback?.text,
-          rating: c.feedback?.rating
+          title: c.title,
+          category: c.category,
+          status: c.status,
+          date: c.date || c.statusTimestamps?.closed || null,
+          feedback: c.feedback || {}
         }))
       );
     }
