@@ -3,7 +3,8 @@ export default function AdminComplaintTable({
   height = '44vh',
   onRowClick,
   onSort,
-  activeSort
+  activeSort,
+  sortDir = 'desc', // 'asc' | 'desc'
 }) {
   const fmt = (v) => {
     if (!v) return '';
@@ -11,25 +12,33 @@ export default function AdminComplaintTable({
     return d.toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
+  const SortIcon = ({ id, activeSort, sortDir }) => {
+    const isActive = activeSort === id;
+    const glyph = isActive ? (sortDir === 'asc' ? '▲' : '▼') : '▼';
+    const color = isActive ? '#222' : '#b9b9b9ff'; // active a bit darker, default dark grey
+    return <span style={{ marginLeft: 6, color }}>{glyph}</span>;
+  };
+
   const TH = ({ id, children }) => (
-    <th
-      role="button"
-      onClick={() => onSort?.(id)}
-      title={`Sort by ${children}`}
-      style={{
-        textAlign: 'left',
-        borderBottom: '1px solid #eee',
-        padding: 8,
-        userSelect: 'none',
-        cursor: 'pointer',
-        whiteSpace: 'nowrap',
-        fontWeight: 600
-      }}
-    >
-      {children}
-      {/* arrows removed */}
-    </th>
-  );
+  <th
+    role="button"
+    onClick={() => onSort?.(id)}
+    title={`Sort by ${children}`}
+    style={{
+      textAlign: 'left',
+      borderBottom: '1px solid #eee',
+      padding: 8,
+      userSelect: 'none',
+      cursor: 'pointer',
+      whiteSpace: 'nowrap',
+      fontWeight: 600,
+    }}
+  >
+    <span>{children}</span>
+    <SortIcon id={id} activeSort={activeSort} sortDir={sortDir} />
+  </th>
+);
+
 
   const TD = ({ children }) => (
     <td
@@ -38,7 +47,7 @@ export default function AdminComplaintTable({
         maxWidth: 220,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
       }}
       title={typeof children === 'string' ? children : undefined}
     >
@@ -68,27 +77,36 @@ export default function AdminComplaintTable({
               <TD>{c.title}</TD>
               <TD>{c.category}</TD>
               <TD>{c.location}</TD>
-              {/* <TD>{c?.userId?.name || '-'}</TD>
-              <TD>{c?.assignedStaff?.name || '-'}</TD> */}
-              {/* <TD>{c.studentName || '-'}</TD>
-              <TD>{c.assignedStaffName || '-'}</TD> */}
               <TD>{c.studentName || c?.userId?.fullname || c?.userId?.name || '-'}</TD>
               <TD>{c.assignedStaffName || '-'}</TD>
-              {/* <TD>{c.assignedStaffName || c?.assignedStaff?.fullname || c?.assignedStaff?.name || '-'}</TD> */}
               <TD style={{ textTransform: 'capitalize' }}>{c.status}</TD>
               <TD>{fmt(c.date || c.createdAt)}</TD>
               <td style={{ padding: 8, whiteSpace: 'nowrap' }}>
                 <button
                   onClick={() => onRowClick?.(c)}
                   title="Edit"
-                  style={{ marginRight: 8, border: '1px solid #ddd', borderRadius: 6, padding: '2px 8px', background: '#fff' }}
+                  style={{
+                    marginRight: 8,
+                    border: '1px solid #ddd',
+                    borderRadius: 6,
+                    padding: '2px 8px',
+                    background: '#fff',
+                    cursor: 'pointer',
+                  }}
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => onRowClick?.(c, { mode: 'delete' })}
                   title="Delete"
-                  style={{ border: '1px solid #f5c2c7', color: '#b00020', borderRadius: 6, padding: '2px 8px', background: '#fff' }}
+                  style={{
+                    border: '1px solid #f5c2c7',
+                    color: '#b00020',
+                    borderRadius: 6,
+                    padding: '2px 8px',
+                    background: '#fff',
+                    cursor: 'pointer',
+                  }}
                 >
                   Delete
                 </button>

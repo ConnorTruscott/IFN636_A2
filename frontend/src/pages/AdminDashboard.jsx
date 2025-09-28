@@ -7,8 +7,7 @@ import {
   adminUpdateComplaint,
   adminDeleteComplaint,
   adminGetComplaintMeta,
-} from '../services/adminApi'; 
-//refreshMeta for sorting, importing Axios instance -> fetchStaff
+} from '../services/adminApi';
 
 const UPPER_H = '44vh';
 const LOWER_H = '44vh';
@@ -18,6 +17,7 @@ export default function AdminDashboard() {
   const [sel, setSel] = useState(null);
   const [meta, setMeta] = useState({ categories: [], locations: [] });
   const [activeSort, setActiveSort] = useState('date');
+  const [sortDir, setSortDir] = useState('desc'); // NEW
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
 
@@ -39,7 +39,6 @@ export default function AdminDashboard() {
       const locations = (m?.locations || []).filter(Boolean);
       setMeta({ categories, locations });
     } catch (e) {
-      // fallback to whatever we can derive from existing list
       const derivedCats = orderCategories(Array.from(new Set(all.map(x => x.category).filter(Boolean))));
       const derivedLocs = Array.from(new Set(all.map(x => x.location).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
       setMeta({ categories: derivedCats, locations: derivedLocs });
@@ -47,11 +46,11 @@ export default function AdminDashboard() {
     }
   };
 
-  const load = async (sortKey = activeSort) => {
+  const load = async (sortKey = activeSort, dir = sortDir) => {
     setLoading(true);
     setErr('');
     try {
-      const data = await adminGetComplaints({ sort: sortKey });
+      const data = await adminGetComplaints({ sort: sortKey, dir });
       setAll(data);
     } catch (e) {
       console.error(e);
@@ -63,15 +62,23 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     (async () => {
-      await load('date');
+      await load('date', 'desc');
       await refreshMeta();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Click header to toggle asc/desc if same column, otherwise switch column & default to asc
   const onSort = async (key) => {
-    setActiveSort(key);
-    await load(key);
+    if (key === activeSort) {
+      const nextDir = sortDir === 'asc' ? 'desc' : 'asc';
+      setSortDir(nextDir);
+      await load(key, nextDir);
+    } else {
+      setActiveSort(key);
+      setSortDir('asc');
+      await load(key, 'asc');
+    }
   };
 
   const onRowClick = async (row, metaAction) => {
@@ -86,7 +93,7 @@ export default function AdminDashboard() {
     }
     const fresh = await adminGetComplaint(row._id);
     setSel(fresh);
-    await refreshMeta(); // make sure editor sees newest categories
+    await refreshMeta();
     document.getElementById('editor-pane')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -96,7 +103,7 @@ export default function AdminDashboard() {
     const fresh = await adminGetComplaint(sel._id);
     setSel(fresh);
     await load();
-    await refreshMeta(); // if category was changed or admin added a new one elsewhere
+    await refreshMeta();
     window.alert('Saved.');
   };
 
@@ -120,6 +127,7 @@ export default function AdminDashboard() {
         onRowClick={onRowClick}
         onSort={onSort}
         activeSort={activeSort}
+        sortDir={sortDir}         
       />
       {loading && <div style={{ padding: '8px 0', color: '#777' }}>Loading…</div>}
       {err && <div style={{ padding: '8px 0', color: '#b00020' }}>{err}</div>}
