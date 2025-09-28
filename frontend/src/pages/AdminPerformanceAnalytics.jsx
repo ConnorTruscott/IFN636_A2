@@ -43,8 +43,8 @@ const AdminPerformanceAnalytics = () => {
         </div>
 
         <div className="bg-white p-4 rounded shadow">
-          <p className="font-semibold">Pending</p>
-          <p>{analytics.pending}</p>
+          <p className="font-semibold">Received</p>
+          <p>{analytics.received}</p>
         </div>
 
         <div className="bg-white p-4 rounded shadow">
@@ -78,6 +78,17 @@ const AdminPerformanceAnalytics = () => {
             : "N/A"}
         </p>
         </div>
+        {/* Warning using Decorator*/}
+      {analytics.warnings && analytics.warnings.length > 0 && (
+        <div className="bg-red-100 p-4 rounded shadow col-span-2">
+          <p className="font-bold text-red-700">Warnings</p>
+          <ul className="list-disc ml-6">
+            {analytics.warnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       </div>
     </div>
   );

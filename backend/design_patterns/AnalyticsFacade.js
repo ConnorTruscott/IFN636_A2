@@ -6,11 +6,11 @@ class ComplaintCountService {
 
   async getCounts() {
     const total = await this.Complaint.countDocuments();
-    const pending = await this.Complaint.countDocuments({ status: "received" });
+    const received = await this.Complaint.countDocuments({ status: "received" });
     const resolving = await this.Complaint.countDocuments({ status: "resolving" });
     const closed = await this.Complaint.countDocuments({ status: "closed" });
 
-    return { total, pending, resolving, closed };
+    return { total, received, resolving, closed };
   }
 }
 
