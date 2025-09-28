@@ -1,10 +1,11 @@
+// frontend/src/components/AdminComplaintTable.jsx
 export default function AdminComplaintTable({
   complaints,
   height = '44vh',
   onRowClick,
   onSort,
   activeSort,
-  sortDir = 'desc', // 'asc' | 'desc'
+  sortDir = 'asc', // optional, harmless if not passed
 }) {
   const fmt = (v) => {
     if (!v) return '';
@@ -12,33 +13,32 @@ export default function AdminComplaintTable({
     return d.toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
-  const SortIcon = ({ id, activeSort, sortDir }) => {
+  const TH = ({ id, children }) => {
     const isActive = activeSort === id;
-    const glyph = isActive ? (sortDir === 'asc' ? '▲' : '▼') : '▼';
-    const color = isActive ? '#222' : '#b9b9b9ff'; // active a bit darker, default dark grey
-    return <span style={{ marginLeft: 6, color }}>{glyph}</span>;
+    const icon = isActive ? (sortDir === 'asc' ? '▲' : '▼') : '▼'; // default ▼ as requested
+    const iconColor = isActive ? '#333' : '#555'; // dark grey
+
+    return (
+      <th
+        role="button"
+        onClick={() => onSort?.(id)}
+        title={`Sort by ${children}`}
+        style={{
+          textAlign: 'left',
+          borderBottom: '1px solid #eee',
+          padding: 8,
+          userSelect: 'none',
+          cursor: 'pointer',
+          whiteSpace: 'nowrap',
+          fontWeight: 600,
+          color: '#222',
+        }}
+      >
+        <span>{children}</span>
+        <span style={{ marginLeft: 6, color: iconColor }}>{icon}</span>
+      </th>
+    );
   };
-
-  const TH = ({ id, children }) => (
-  <th
-    role="button"
-    onClick={() => onSort?.(id)}
-    title={`Sort by ${children}`}
-    style={{
-      textAlign: 'left',
-      borderBottom: '1px solid #eee',
-      padding: 8,
-      userSelect: 'none',
-      cursor: 'pointer',
-      whiteSpace: 'nowrap',
-      fontWeight: 600,
-    }}
-  >
-    <span>{children}</span>
-    <SortIcon id={id} activeSort={activeSort} sortDir={sortDir} />
-  </th>
-);
-
 
   const TD = ({ children }) => (
     <td
@@ -68,7 +68,11 @@ export default function AdminComplaintTable({
             <TH id="assignedStaff">Assigned Staff</TH>
             <TH id="status">Status</TH>
             <TH id="date">Date</TH>
-            <th style={{ textAlign: 'left', borderBottom: '1px solid #eee', padding: 8, whiteSpace: 'nowrap' }}>Action</th>
+            {/* ADDED: Feedback column */}
+            <TH id="feedback">Feedback</TH>
+            <th style={{ textAlign: 'left', borderBottom: '1px solid #eee', padding: 8, whiteSpace: 'nowrap' }}>
+              Action
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -81,6 +85,22 @@ export default function AdminComplaintTable({
               <TD>{c.assignedStaffName || '-'}</TD>
               <TD style={{ textTransform: 'capitalize' }}>{c.status}</TD>
               <TD>{fmt(c.date || c.createdAt)}</TD>
+
+              {/* ADDED: Feedback cell (View when closed, else '-') */}
+              <TD>
+                {c.status === 'closed' ? (
+                  <button
+                    onClick={() => onRowClick?.(c, { mode: 'viewFeedback' })}
+                    title="View Feedback"
+                    style={{ border: '1px solid #ddd', borderRadius: 6, padding: '2px 8px', background: '#fff' }}
+                  >
+                    View
+                  </button>
+                ) : (
+                  '-'
+                )}
+              </TD>
+
               <td style={{ padding: 8, whiteSpace: 'nowrap' }}>
                 <button
                   onClick={() => onRowClick?.(c)}
@@ -91,7 +111,6 @@ export default function AdminComplaintTable({
                     borderRadius: 6,
                     padding: '2px 8px',
                     background: '#fff',
-                    cursor: 'pointer',
                   }}
                 >
                   Edit
@@ -105,7 +124,6 @@ export default function AdminComplaintTable({
                     borderRadius: 6,
                     padding: '2px 8px',
                     background: '#fff',
-                    cursor: 'pointer',
                   }}
                 >
                   Delete
@@ -115,7 +133,8 @@ export default function AdminComplaintTable({
           ))}
           {!complaints.length && (
             <tr>
-              <td colSpan="8" style={{ padding: 12, color: '#777' }}>
+              {/* NOTE: +1 colSpan to include Feedback column */}
+              <td colSpan="10" style={{ padding: 12, color: '#777' }}>
                 No complaints found.
               </td>
             </tr>
