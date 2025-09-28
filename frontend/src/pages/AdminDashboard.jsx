@@ -20,6 +20,32 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
 
+  const orderCategories = (arr) => {
+    const clean = Array.from(new Set(
+      (arr || []).map(s => (s ?? '').toString().trim()).filter(Boolean)
+    ));
+    const withoutOther = clean
+      .filter(s => s.toLowerCase() !== 'other')
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    const hasOther = clean.some(s => s.toLowerCase() === 'other');
+    return hasOther ? [...withoutOther, 'Other'] : withoutOther;
+  };
+
+  const refreshMeta = async () => {
+    try {
+      const m = await adminGetComplaintMeta();
+      const categories = orderCategories(m?.categories || []);
+      const locations = (m?.locations || []).filter(Boolean);
+      setMeta({ categories, locations });
+    } catch (e) {
+      // fallback to whatever we can derive from existing list
+      const derivedCats = orderCategories(Array.from(new Set(all.map(x => x.category).filter(Boolean))));
+      const derivedLocs = Array.from(new Set(all.map(x => x.location).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+      setMeta({ categories: derivedCats, locations: derivedLocs });
+      console.warn('Failed to load meta, used fallback from complaints list');
+    }
+  };
+
   const load = async (sortKey = activeSort) => {
     setLoading(true);
     setErr('');
@@ -34,35 +60,10 @@ export default function AdminDashboard() {
     }
   };
 
-  // Make a simple unique extractor
-  const uniqueFromList = (items, key) => {
-    const s = new Set(
-      items
-        .map(x => (x?.[key] ?? '').toString().trim())
-        .filter(Boolean)
-    );
-    return Array.from(s).sort((a, b) => a.localeCompare(b));
-  };
-
   useEffect(() => {
     (async () => {
       await load('date');
-      try {
-        const m = await adminGetComplaintMeta();
-        const categories = (m?.categories ?? []).filter(Boolean);
-        const locations = (m?.locations ?? []).filter(Boolean);
-
-        const fallbackCategories = categories.length ? categories : uniqueFromList(all, 'category');
-        const fallbackLocations = locations.length ? locations : uniqueFromList(all, 'location');
-
-        setMeta({ categories: fallbackCategories, locations: fallbackLocations });
-      } catch (e) {
-        console.warn('Failed to load meta, deriving from list');
-        setMeta({
-          categories: uniqueFromList(all, 'category'),
-          locations: uniqueFromList(all, 'location'),
-        });
-      }
+      await refreshMeta();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -79,10 +80,12 @@ export default function AdminDashboard() {
       await adminDeleteComplaint(row._id, reason);
       setSel(null);
       await load();
+      await refreshMeta();
       return;
     }
     const fresh = await adminGetComplaint(row._id);
     setSel(fresh);
+    await refreshMeta(); // make sure editor sees newest categories
     document.getElementById('editor-pane')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -92,6 +95,7 @@ export default function AdminDashboard() {
     const fresh = await adminGetComplaint(sel._id);
     setSel(fresh);
     await load();
+    await refreshMeta(); // if category was changed or admin added a new one elsewhere
     window.alert('Saved.');
   };
 
@@ -102,6 +106,7 @@ export default function AdminDashboard() {
     await adminDeleteComplaint(sel._id, reason);
     setSel(null);
     await load();
+    await refreshMeta();
   };
 
   return (

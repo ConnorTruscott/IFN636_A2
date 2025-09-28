@@ -5,115 +5,141 @@ export default function ComplaintEditor({
   categories = [], locations = []
 }) {
   const [form, setForm] = useState({
-    title:'', category:'', location:'', description:'', status:'received', photos:[]
+    title:'', category:'', location:'', description:'', status:'received'
   });
-  const [photosStr, setPhotosStr] = useState('');
   const disabled = !value;
 
   useEffect(() => {
     if (!value) {
-      setForm({ title:'', category:'', location:'', description:'', status:'received', photos:[] });
-      setPhotosStr('');
+      setForm({ title:'', category:'', location:'', description:'', status:'received' });
       return;
     }
-    const photos = Array.isArray(value.photos) ? value.photos : [];
     setForm({
       title: value.title || '',
       category: value.category || '',
       location: value.location || '',
       description: value.description || '',
       status: value.status || 'received',
-      photos
     });
-    setPhotosStr(photos.join(', '));
   }, [value]);
 
-  const categoryOptions = useMemo(() => {
-    const s = new Set((categories || []).filter(Boolean));
-    if (form.category) s.add(form.category);
-    return Array.from(s).sort((a,b)=>a.localeCompare(b));
-  }, [categories, form.category]);
-
-  // Build location options = presets + the current value (so it shows even if not preset)
-  const locationOptions = useMemo(() => {
-    const s = new Set((locations || []).filter(Boolean));
-    if (form.location) s.add(form.location);
-    return Array.from(s).sort((a,b)=>a.localeCompare(b));
-  }, [locations, form.location]);
-
   const change = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
-  const changePhotos = e => {
-    const raw = e.target.value;
-    setPhotosStr(raw);
-    const arr = raw.split(',').map(s => s.trim()).filter(Boolean);
-    setForm(p => ({ ...p, photos: arr }));
-  };
+
   const askDelete = () => {
     const reason = window.prompt('Please enter a reason for deletion:');
     if (!reason) return;
     onDelete?.(reason);
   };
 
+  // styles (match Create Complaint / table buttons)
+  const input = {
+    width:'100%', padding:'8px', border:'1px solid #ddd', borderRadius:6, background:'#fff'
+  };
+  const label = { display:'block', fontWeight:600, marginBottom:6 };
+  const group = { display:'flex', flexDirection:'column', gap:6 };
+  const btn = {
+    base: { border:'1px solid #ddd', borderRadius:6, padding:'6px 10px', background:'#fff', cursor:'pointer' },
+    danger: { border:'1px solid #f5c2c7', color:'#b00020', borderRadius:6, padding:'6px 10px', background:'#fff', cursor:'pointer' }
+  };
+
+  const categoryOptions = useMemo(() => {
+    // clean & order A→Z with “Other” last
+    const clean = Array.from(new Set(
+      (categories || []).map(x => (x ?? '').toString().trim()).filter(Boolean)
+    ));
+    const withoutOther = clean
+      .filter(s => s.toLowerCase() !== 'other')
+      .sort((a,b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    const hasOther = clean.some(s => s.toLowerCase() === 'other');
+    const ordered = hasOther ? [...withoutOther, 'Other'] : withoutOther;
+
+    // ensure current shows even if meta is stale or missing
+    const current = (form.category ?? '').toString().trim();
+    if (current && !ordered.includes(current)) {
+      return [current, ...ordered];
+    }
+    return ordered;
+  }, [categories, form.category]);
+
   return (
     <div style={{ border:'1px solid #ddd', borderRadius:8, padding:12, height, overflowY:'auto' }}>
-      <h3 style={{ margin:'0 0 8px 0' }}>Edit Complaint Details</h3>
+      <h3 style={{ margin:'0 0 12px 0' }}>Edit Complaint Details</h3>
       {!value && <div style={{ color:'#777', marginBottom:12 }}>Select a complaint above.</div>}
 
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-        <label style={{ gridColumn:'1 / span 2' }}>Title
-          <input name="title" value={form.title} onChange={change} style={{ width:'100%' }} disabled={disabled}/>
-        </label>
+        <div style={{ ...group, gridColumn:'1 / span 2' }}>
+          <label style={label}>Title</label>
+          <input
+            name="title"
+            value={form.title}
+            onChange={change}
+            style={input}
+            disabled={disabled}
+            placeholder="Enter a short title"
+          />
+        </div>
 
-        <label>Category
+        <div style={group}>
+          <label style={label}>Category</label>
           <select
             name="category"
             value={form.category}
             onChange={change}
+            style={input}
             disabled={disabled}
-            style={{ width:'100%' }}
           >
             <option value="">Select category</option>
-            {categoryOptions.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+            {categoryOptions.map((c) => (
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label>Location
+        <div style={group}>
+          <label style={label}>Location</label>
+          {/* Admin cannot change location per backend rule; keep read-only */}
           <select
             name="location"
             value={form.location}
+            onChange={change}
+            style={{ ...input, color:'#444', background:'#f9f9f9' }}
             disabled
-            style={{ width:'100%', background:'#f8f8f8' }}
+            title="Location cannot be changed by admin"
           >
-            <option value="">Select location</option>
-            {locationOptions.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+            <option value="">{form.location ? form.location : 'Select location'}</option>
+            {locations.map((l) => (
+              <option key={l} value={l}>{l}</option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label style={{ gridColumn:'1 / span 2' }}>Description
-          <textarea name="description" rows={4} value={form.description} onChange={change} style={{ width:'100%' }} disabled={disabled}/>
-        </label>
+        <div style={{ ...group, gridColumn:'1 / span 2' }}>
+          <label style={label}>Description</label>
+          <textarea
+            name="description"
+            rows={4}
+            value={form.description}
+            onChange={change}
+            style={{ ...input, resize:'vertical' }}
+            disabled={disabled}
+            placeholder="Add details that help staff resolve this complaint"
+          />
+        </div>
 
-        <label style={{ gridColumn:'1 / span 2' }}>Upload Photo (comma-separated URLs)
-          <input value={photosStr} onChange={changePhotos} placeholder="https://... , https://..." style={{ width:'100%' }} disabled={disabled}/>
-        </label>
-
-        <label>Status
-          <select name="status" value={form.status} onChange={change} disabled={disabled}>
+        <div style={group}>
+          <label style={label}>Status</label>
+          <select name="status" value={form.status} onChange={change} disabled={disabled} style={input}>
             <option value="received">received</option>
             <option value="resolving">resolving</option>
             <option value="closed">closed</option>
           </select>
-        </label>
+        </div>
       </div>
 
       <div style={{ marginTop:16, display:'flex', gap:8 }}>
-        <button onClick={() => onSave?.(form)} disabled={disabled}>Save</button>
-        <button onClick={onClear}>Clear</button>
-        <button onClick={askDelete} disabled={disabled} style={{ color:'#b00020' }}>Delete</button>
+        <button onClick={() => onSave?.(form)} disabled={disabled} style={btn.base}>Save</button>
+        <button onClick={onClear} style={btn.base}>Clear</button>
+        <button onClick={askDelete} disabled={disabled} style={btn.danger}>Delete</button>
       </div>
     </div>
   );
