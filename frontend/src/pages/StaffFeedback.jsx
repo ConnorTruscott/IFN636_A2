@@ -43,7 +43,10 @@ const StaffFeedback = () => {
                 onClick={() => setSelectedFeedback(fb)} 
               >
                 <div className="flex justify-between">
+                  <div>
                   <h3 className="font-semibold text-lg">{fb.complaintTitle}</h3>
+                  <p className="text-sm text-gray-500">By: {fb.studentName || "Unknown Student"}</p>
+                  </div>
                   <div className="text-indigo-600 font-bold">Rating: {fb.rating}</div>
                 </div>
                 <p className="text-gray-700 mt-2 line-clamp-2">{fb.text}</p>
@@ -64,6 +67,7 @@ const StaffFeedback = () => {
               ✕
             </button>
             <h2 className="text-xl font-bold mb-4">{selectedFeedback.complaintTitle}</h2>
+            <p className="text-sm text-gray-500 mb-2">By: {selectedFeedback.studentName || "Unknown Student"}</p>
             <p className="mb-4">{selectedFeedback.text}</p>
             <p className="text-indigo-600 font-semibold">Rating: {selectedFeedback.rating}</p>
           </div>
