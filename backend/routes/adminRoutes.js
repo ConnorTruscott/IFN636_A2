@@ -1,7 +1,7 @@
 const express = require('express');
 const { protect } = require('../middleware/authMiddleware');
 const {
-  createStaff, listStaff,
+  createStaff, listStaff, deleteStaff, updateStaffDepartment,
   getAllComplaints, adminGetComplaintById, adminUpdateComplaint, adminDeleteComplaint,
   getComplaintMeta,
 } = require('../controllers/adminController');
@@ -15,6 +15,9 @@ const router = express.Router();
 router.route('/staff')
   .get(protect, listStaff)
   .post(protect, createStaff);
+
+router.delete('/staff/:id',protect,  deleteStaff);
+router.put('/staff/:id/department', protect, updateStaffDepartment);
 
 // Meta (categories from DB + preset locations)
 router.get('/complaints/meta', protect, getComplaintMeta);

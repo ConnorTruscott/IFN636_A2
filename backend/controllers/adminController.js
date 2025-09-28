@@ -39,6 +39,41 @@ const listStaff = async (_req, res) => {
   }
 };
 
+const deleteStaff = async (req, res) => {
+  try{
+    const {id}=req.params;
+
+    const staff = await User.findOneAndDelete({_id: id, role: 'Staff'});
+    if (!staff) {
+      return res.status(404).json({message: 'Staff not found'});
+    }
+
+    res.json({message: 'Staff deleted successfully'});
+  } catch (err) {
+    res.status(500).json({message: err.message});
+  }
+};
+
+const updateStaffDepartment = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {department} = req.body;
+
+    const staff = await User.findOneAndUpdate(
+      {_id: id, role: 'Staff'},
+      {department},
+      {new: true}
+    );
+
+    if (!staff) {
+      return res.status(404).json({message: 'Staff not found'});
+    }
+    res.json(staff);
+  } catch (err) {
+    res.status(500).json({message: err.message});
+  }
+};
+
 // list all complaints (newest first) — populate student name only
 const getAllComplaints = async (_req, res) => {
   try {
@@ -142,6 +177,8 @@ const adminDeleteComplaint = async (req, res) => {
 module.exports = {
   createStaff,
   listStaff,
+  deleteStaff,
+  updateStaffDepartment,
   getAllComplaints,
   adminGetComplaintById,
   adminUpdateComplaint,

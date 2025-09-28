@@ -38,6 +38,30 @@ const AdminPage = () => {
         }
     };
 
+    const handleDeleteStaff = async (id, department) => {
+        try {
+            const {data} = await axiosInstance.delete(`/api/admin/staff/${id}`, {
+                headers: {Authorization: `Bearer ${user.token}`},
+            });
+            setStaff(staff.filter((s) => s._id !== id));
+        } catch (err) {
+            console.error("Failed to delete staff", err);
+            alert("Could not delete staff");
+        }
+    };
+
+    const handleUpdateDepartment = async (id, department) => {
+        try {
+            const {data} = await axiosInstance.put(`/api/admin/staff/${id}/department`, {department},
+                {headers: {Authorization: `Bearer ${user.token}`}}
+            );
+            setStaff(staff.map((s) => (s._id === id ? {...s, department}:s)));
+        } catch (err) {
+            console.error("Failed to update department", err);
+            alert("Could not update department");
+        }
+    };
+
     useEffect(() => {
         const fetchDepartments = async () => {
             try {
@@ -139,8 +163,24 @@ const AdminPage = () => {
                 <h2 className="text-xl font-semibold mb-2">Existing Staff</h2>
                 <ul>
                     {staff.map((s) =>(
-                        <li key={s._id}>
-                            {s.name} ({s.email}) - {s.department}
+                        <li key={s._id} className="mb-2 flex items-center gap-2">
+                            <span className="flex-1">
+                                {s.name} ({s.email}) - {s.department}
+
+                                <select value={s.department || ""} onChange={(e) => handleUpdateDepartment(s._id, e.target.value)}>
+                                    <option value="">Select Department</option>
+                                    {departments.map((d) => (
+                                        <option key={d._id} value={d.name}>
+                                            {d.name}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <button onClick={() => handleDeleteStaff(s._id)}
+                                className="bg-red-500 text-white pc-2 py-1 rounded">
+                                    Delete
+                                </button>
+                            </span>
                         </li>
                     ))}
                 </ul>

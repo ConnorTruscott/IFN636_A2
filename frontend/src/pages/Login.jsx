@@ -32,6 +32,7 @@ const Login = () => {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
+          autoFocus
         />
         <input
           type="password"
