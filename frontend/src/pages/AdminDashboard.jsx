@@ -1,6 +1,8 @@
+// frontend/src/pages/AdminDashboard.jsx
 import { useEffect, useState } from 'react';
 import AdminComplaintTable from '../components/AdminComplaintTable';
 import ComplaintEditor from '../components/ComplaintEditor';
+import Feedback from '../pages/Feedback'; // ADDED: reuse as read-only viewer
 import {
   adminGetComplaints,
   adminGetComplaint,
@@ -17,18 +19,17 @@ export default function AdminDashboard() {
   const [sel, setSel] = useState(null);
   const [meta, setMeta] = useState({ categories: [], locations: [] });
   const [activeSort, setActiveSort] = useState('date');
-  const [sortDir, setSortDir] = useState('desc'); // NEW
+  const [sortDir, setSortDir] = useState('desc'); // keep your existing default if any
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
+  const [paneMode, setPaneMode] = useState('edit'); // 'edit' | 'feedback'
 
   const orderCategories = (arr) => {
-    const clean = Array.from(new Set(
-      (arr || []).map(s => (s ?? '').toString().trim()).filter(Boolean)
-    ));
+    const clean = Array.from(new Set((arr || []).map((s) => (s ?? '').toString().trim()).filter(Boolean)));
     const withoutOther = clean
-      .filter(s => s.toLowerCase() !== 'other')
+      .filter((s) => s.toLowerCase() !== 'other')
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-    const hasOther = clean.some(s => s.toLowerCase() === 'other');
+    const hasOther = clean.some((s) => s.toLowerCase() === 'other');
     return hasOther ? [...withoutOther, 'Other'] : withoutOther;
   };
 
@@ -38,9 +39,11 @@ export default function AdminDashboard() {
       const categories = orderCategories(m?.categories || []);
       const locations = (m?.locations || []).filter(Boolean);
       setMeta({ categories, locations });
-    } catch (e) {
-      const derivedCats = orderCategories(Array.from(new Set(all.map(x => x.category).filter(Boolean))));
-      const derivedLocs = Array.from(new Set(all.map(x => x.location).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+    } catch {
+      const derivedCats = orderCategories(Array.from(new Set(all.map((x) => x.category).filter(Boolean))));
+      const derivedLocs = Array.from(new Set(all.map((x) => x.location).filter(Boolean))).sort((a, b) =>
+        a.localeCompare(b),
+      );
       setMeta({ categories: derivedCats, locations: derivedLocs });
       console.warn('Failed to load meta, used fallback from complaints list');
     }
@@ -50,6 +53,7 @@ export default function AdminDashboard() {
     setLoading(true);
     setErr('');
     try {
+      // your backend currently ignores sort & dir; leaving the call shape intact for future
       const data = await adminGetComplaints({ sort: sortKey, dir });
       setAll(data);
     } catch (e) {
@@ -68,17 +72,11 @@ export default function AdminDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Click header to toggle asc/desc if same column, otherwise switch column & default to asc
   const onSort = async (key) => {
-    if (key === activeSort) {
-      const nextDir = sortDir === 'asc' ? 'desc' : 'asc';
-      setSortDir(nextDir);
-      await load(key, nextDir);
-    } else {
-      setActiveSort(key);
-      setSortDir('asc');
-      await load(key, 'asc');
-    }
+    const nextDir = activeSort === key ? (sortDir === 'asc' ? 'desc' : 'asc') : 'asc';
+    setActiveSort(key);
+    setSortDir(nextDir);
+    await load(key, nextDir);
   };
 
   const onRowClick = async (row, metaAction) => {
@@ -91,9 +89,19 @@ export default function AdminDashboard() {
       await refreshMeta();
       return;
     }
+
+    if (metaAction?.mode === 'viewFeedback') {
+      const fresh = await adminGetComplaint(row._id); // ensure feedback present
+      setSel(fresh);
+      setPaneMode('feedback');
+      document.getElementById('editor-pane')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // default: edit
     const fresh = await adminGetComplaint(row._id);
     setSel(fresh);
-    await refreshMeta();
+    setPaneMode('edit');
     document.getElementById('editor-pane')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -127,7 +135,7 @@ export default function AdminDashboard() {
         onRowClick={onRowClick}
         onSort={onSort}
         activeSort={activeSort}
-        sortDir={sortDir}         
+        sortDir={sortDir} // passes through but harmless if table ignores
       />
       {loading && <div style={{ padding: '8px 0', color: '#777' }}>Loading…</div>}
       {err && <div style={{ padding: '8px 0', color: '#b00020' }}>{err}</div>}
@@ -135,15 +143,27 @@ export default function AdminDashboard() {
       <div style={{ height: 16 }} />
 
       <div id="editor-pane">
-        <ComplaintEditor
-          value={sel}
-          onSave={onSave}
-          onClear={onClear}
-          onDelete={onDelete}
-          height={LOWER_H}
-          categories={meta.categories}
-          locations={meta.locations}
-        />
+        {paneMode === 'feedback' ? (
+          <Feedback
+            readOnly
+            initial={{
+              title: sel?.title ?? '',
+              rating: sel?.feedback?.rating ?? '',
+              text: sel?.feedback?.text ?? '',
+            }}
+            onClose={() => setPaneMode('edit')}
+          />
+        ) : (
+          <ComplaintEditor
+            value={sel}
+            onSave={onSave}
+            onClear={onClear}
+            onDelete={onDelete}
+            height={LOWER_H}
+            categories={meta.categories}
+            locations={meta.locations}
+          />
+        )}
       </div>
     </div>
   );
