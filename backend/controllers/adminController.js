@@ -2,9 +2,9 @@ const User = require('../models/User');
 const { Admin } = require('../models/UserRoles');
 const AdminProxy = require('../design_patterns/adminProxy');
 const Complaint = require('../models/Complaint');
-const Category = require('../models/Category');
+// const Category = require('../models/Category'); // no longer used as a source of categories
+const Department = require('../models/Department'); // <-- use departments as the category source
 const PRESET_LOCATIONS = require('../config/locations');
-const CATEGORY_DEFAULTS = require('../config/categories'); // <-- add this
 
 const createStaff = async (req, res) => {
   try {
@@ -53,36 +53,41 @@ const getAllComplaints = async (_req, res) => {
 };
 
 // Admin meta for dropdowns
-// Merge DB + defaults, dedupe, sort A→Z (case-insensitive), keep "Other" last.
+// Categories come from Department names (SSOT).
+// Deduplicate, sort A→Z (case-insensitive), keep "Other" last, and ensure "Other" exists.
 const getComplaintMeta = async (_req, res) => {
   try {
-    const docs = await Category.find().sort({ name: 1 });
+    const docs = await Department.find().sort({ name: 1 }); // server-side sort cheap & fine
 
-    const dbNames = docs
-      .map(c => (c?.name ?? '').toString().trim())
+    // Clean names
+    const raw = (docs || [])
+      .map(d => (d?.name ?? '').toString().trim())
       .filter(Boolean);
 
-    // merge with defaults and unique
-    const merged = Array.from(new Set([
-      ...dbNames,
-      ...CATEGORY_DEFAULTS
-    ]));
+    // Unique
+    const unique = Array.from(new Set(raw));
 
-    // sort (case-insensitive) with "Other" last
-    const withoutOther = merged
-      .filter(s => s.toLowerCase() !== 'other')
+    // Make sure "Other" is present at least once
+    const ensured = unique.some(n => n.toLowerCase() === 'other')
+      ? unique
+      : [...unique, 'Other'];
+
+    // Case-insensitive A→Z, with "Other" last
+    const withoutOther = ensured
+      .filter(n => n.toLowerCase() !== 'other')
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-    const hasOther = merged.some(s => s.toLowerCase() === 'other');
-    const categories = hasOther ? [...withoutOther, 'Other'] : withoutOther;
+    const categories = [...withoutOther, 'Other'];
 
-    const locations = PRESET_LOCATIONS; // admin cannot edit these
+    // Locations remain preset & not admin-editable
+    const locations = PRESET_LOCATIONS;
+
     res.json({ categories, locations });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
 };
 
-// get single complaint by id — include student name (and keep shape consistent)
+// get single complaint by id — include student name (shape consistent)
 const adminGetComplaintById = async (req, res) => {
   try {
     const c = await Complaint.findById(req.params.id)
@@ -113,7 +118,7 @@ const adminUpdateComplaint = async (req, res) => {
     if (status !== undefined) complaint.status = status;
     if (date !== undefined) complaint.date = date;
 
-    // admin does not change location; assigned staff not in schema
+    // Admin does not change location; assigned staff not in schema
 
     const updated = await complaint.save();
     res.json(updated);
