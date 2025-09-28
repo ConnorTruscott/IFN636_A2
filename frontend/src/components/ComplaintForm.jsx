@@ -4,7 +4,15 @@ import axiosInstance from '../axiosConfig';
 
 const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditingComplaint }) => {
   const { user } = useAuth();
-  const [formData, setFormData] = useState({ title: '', category: '', description: '', location: '', date: '' });
+  const [formData, setFormData] = useState({
+    title: '',
+    category: '',
+    description:'',
+    location: '',
+    date: '',
+    priority: 'Normal',
+    anonymous: false
+  });
   const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
@@ -37,9 +45,11 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
         location: editingComplaint.location || '',
         description: editingComplaint.description,
         date: editingComplaint.date,
+        priority: editingComplaint.priority || 'Normal',
+        anonymous: editingComplaint.anonymous || false,
       });
     } else {
-      setFormData({ title: '', category: '', description: '', location: '', date: '' });
+      setFormData({ title: '', category: '', description: '', location: '', date: '', priority: 'Normal', anonymous: false });
     }
   }, [editingComplaint]);
 
@@ -59,7 +69,7 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
         setComplaints([...complaints, response.data]);
       }
       setEditingComplaint(null);
-      setFormData({ title: '', category: '', description: '', location: '', date: '' });
+      setFormData({ title: '', category: '', description: '', location: '', date: '', priority: 'Normal', anonymous:false });
     } catch (error) {
       alert('Failed to save complaint.');
     }
@@ -91,6 +101,23 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
         ))}
         <option value="Other">Other</option>
       </select>
+
+      <label className="block text-gray-700 font-semibold mb-1">Priority</label>
+      < select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+      className="w-full mb-4 p-2 border rounded">
+        <option value="Low">Low</option>
+        <option value="Normal">Normal</option>
+        <option value="High">High</option>
+      </select>
+      <label className="block text-gray-700 font-semibold mb-1">
+        <input type="checkbox"
+        checked={formData.anonymous}
+        onChange={(e) => setFormData({...formData, anonymous: e.target.checked})}
+        className="mr-2" />
+        Submit Anonymously
+      </label>
+
+
       <label className="block text-gray-700 font-semibold mb-1">Description</label>
       <input
         type="text"

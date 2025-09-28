@@ -1,5 +1,6 @@
 const Complaint = require('../models/Complaint');
 const notificationService = require('../design_patterns/NotificationService');
+const {ComplaintBase, PriorityDecorator, AnonymousDecorator} = require('../design_patterns/complaintDecorator');
 const { compare } = require('bcrypt');
 const User = require('../models/User');
 
@@ -16,11 +17,32 @@ const getComplaints = async (req, res) => {
 };
 //For Admin usage
 const getAllComplaints = async (req, res) => {
+  // try {
+  //   const complaints = await Complaint.find().sort({ date: -1});
+  //   res.json(complaints);
+  // } catch (error) {
+  //   res.status(500).json({message: error.message});
+  // }
   try {
-    const complaints = await Complaint.find().sort({ date: -1});
-    res.json(complaints);
-  } catch (error) {
-    res.status(500).json({message: error.message});
+    const complaints = await Complaint.find().populate('userId');
+
+    const decoratedComplaints = complaints.map(c => {
+      let complaintObj = new ComplaintBase(c);
+
+      if (c.priority) {
+        complaintObj = new PriorityDecorator(complaintObj, c.priority);
+      }
+
+      if (c.anonymous) {
+        complaintObj = new AnonymousDecorator(complaintObj);
+      }
+
+      return complaintObj.getDetails();
+    });
+
+    res.json(decoratedComplaints);
+  } catch (err){
+    res.status(500).json({message: err.message});
   }
 };
 
@@ -50,22 +72,53 @@ const getComplaintsByCategory = async (req, res) => {
 
 // CREATE
 const addComplaint = async (req, res) => {
-  const { title, category, description, location, date } = req.body;
+  const { title, category, description, location, date, priority, anonymous } = req.body;
+  // try {
+  //   const complaint = await Complaint.create({
+  //     userId: req.user.id,
+  //     title,
+  //     category,
+  //     description,
+  //     location,
+  //     date: date ? new Date(date) : null,
+  //     statusTimestamps: { received: new Date() }
+  //     // status defaults in schema
+  //   });
+  //   notificationService.complaintCreated(req.user.id, req.user.name, complaint._id)
+  //   res.status(201).json(complaint);
+  // } catch (error) {
+  //   res.status(500).json({ message: error.message });
+  // }
   try {
-    const complaint = await Complaint.create({
+    let baseComplaint = new ComplaintBase({
       userId: req.user.id,
       title,
       category,
       description,
       location,
-      date: date ? new Date(date) : null,
-      statusTimestamps: { received: new Date() }
-      // status defaults in schema
+      date: date ? new Date(date): null,
+      statusTimestamps: {received: new Date() },
     });
-    notificationService.complaintCreated(req.user.id, req.user.name, complaint._id)
+    if (priority){
+      baseComplaint = new PriorityDecorator(baseComplaint, priority);
+    }
+
+    if (anonymous) {
+      baseComplaint = new AnonymousDecorator(baseComplaint);
+    }
+
+    const decoratedComplaint = baseComplaint.getDetails();
+    const complaint = await Complaint.create(decoratedComplaint);
+
+    notificationService.complaintCreated(
+      req.user.id,
+      req.user.name,
+      complaint._id
+    );
+
     res.status(201).json(complaint);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({message: err.message});
   }
 };
 

@@ -77,7 +77,7 @@ export default function AdminComplaintTable({
               <TD>{c.title}</TD>
               <TD>{c.category}</TD>
               <TD>{c.location}</TD>
-              <TD>{c.studentName || c?.userId?.fullname || c?.userId?.name || '-'}</TD>
+              <TD>{c.displayUser || c.studentName || c?.userId?.fullname || c?.userId?.name || '-'}</TD>
               <TD>{c.assignedStaffName || '-'}</TD>
               <TD style={{ textTransform: 'capitalize' }}>{c.status}</TD>
               <TD>{fmt(c.date || c.createdAt)}</TD>
