@@ -67,6 +67,14 @@ const addComplaint = async (req, res) => {
       // status defaults in schema
     });
     notificationService.complaintCreated(req.user.id, req.user.name, complaint._id)
+
+    const staffMembers = await User.find({role: "Staff", department: category});
+    for (const staff of staffMembers){
+      const staffObserver = new StaffObserver(staff._id);
+      notificationService.subscribe(staffObserver);
+      notificationService.complaintAssigned(staff._id, complaint._id);
+      notificationService.unsubscribe(staffObserver);
+    }
     res.status(201).json(complaint);
   } catch (error) {
     res.status(500).json({ message: error.message });
