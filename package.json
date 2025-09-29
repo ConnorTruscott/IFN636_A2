@@ -14,5 +14,8 @@
     "mocha": "^11.0.1"
   },
   "author": "Complaint Manager Team",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "recharts": "^3.2.1"
+  }
 }
