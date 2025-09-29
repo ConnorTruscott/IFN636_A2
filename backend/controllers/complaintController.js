@@ -269,7 +269,7 @@ const saveFeedback = async (req, res) => {
     if (staff) {
       const staffObserver = new StaffObserver(staff._id);
       notificationService.subscribe(staffObserver);
-      notificationService.feedbackSubmitted(staff._id, feedback._id);
+      notificationService.feedbackSubmitted(staff._id, complaint._id);
       notificationService.unsubscribe(staffObserver);
     }
     res.json(updated);
