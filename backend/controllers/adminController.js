@@ -7,6 +7,7 @@ const PRESET_LOCATIONS = require('../config/locations');
 const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy'); 
 const notificationService = require('../design_patterns/NotificationService');
 const {UserObserver} = require('../design_patterns/NotificationObservers');
+const ComplaintWrapper = require('../design_patterns/complaintStatesWrapper');
 
 const createStaff = async (req, res) => {
   try {
@@ -187,17 +188,16 @@ const adminUpdateComplaint = async (req, res) => {
     if (title !== undefined) complaint.title = title;
     if (category !== undefined) complaint.category = category;
     if (description !== undefined) complaint.description = description;
-    if (status !== undefined) complaint.status = status;
+    //if (status !== undefined) complaint.status = status;
     if (date !== undefined) complaint.date = date;
 
-    const updated = await complaint.save();
+    const wrapper = new ComplaintWrapper(complaint);
 
-    if (status !== undefined){
-      const studentObserver = new UserObserver(complaint.userId);
-      notificationService.subscribe(studentObserver)
-      notificationService.complaintStatusUpdated(complaint.userId, complaint._id, complaint.status);
-      notificationService.unsubscribe(studentObserver);
+    if (status) {
+      await wrapper.updateStatus(status);
     }
+
+    const updated = await complaint.save();
     res.json(updated);
   } catch (error) {
     res.status(500).json({ message: error.message });

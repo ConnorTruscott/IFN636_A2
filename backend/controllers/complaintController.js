@@ -4,6 +4,7 @@ const { compare } = require('bcrypt');
 const User = require('../models/User');
 const {UserObserver, StaffObserver} = require('../design_patterns/NotificationObservers');
 const { Staff } = require('../models/UserRoles');
+const ComplaintWrapper = require('../design_patterns/complaintStatesWrapper');
 
 
 
@@ -66,6 +67,14 @@ const addComplaint = async (req, res) => {
       // status defaults in schema
     });
     notificationService.complaintCreated(req.user.id, req.user.name, complaint._id)
+
+    const staffMembers = await User.find({role: "Staff", department: category});
+    for (const staff of staffMembers){
+      const staffObserver = new StaffObserver(staff._id);
+      notificationService.subscribe(staffObserver);
+      notificationService.complaintAssigned(staff._id, complaint._id);
+      notificationService.unsubscribe(staffObserver);
+    }
     res.status(201).json(complaint);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -96,34 +105,18 @@ const updateComplaint = async (req, res) => {
 // Update complaint status for admin
 const updateComplaintStatus = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status } = req.body;
+    const {status} = req.body;
+    const complaint = await Complaint.findById(req.params.id);
+    if (!complaint) return res.status(404).json({message: 'Complaint not found'});
 
-    const complaint = await Complaint.findById(id);
-    if (!complaint) {
-      return res.status(404).json({ message: 'Complaint not found' });
-    }
-
-    // Record times
-    if (status === "received") {
-      complaint.statusTimestamps.received = new Date();
-    }
-    if (status === "resolving") {
-      complaint.statusTimestamps.resolving = new Date();
-    }
-    if (status === "closed") {
-      complaint.statusTimestamps.closed = new Date();
+    const wrapped = new ComplaintWrapper(complaint);
+    if (status){
+      await wrapped.updateStatus(status);
     }
 
-    complaint.status = status;
+
     const updated = await complaint.save();
-
-    const studentObserver = new UserObserver(complaint.userId);
-    notificationService.subscribe(studentObserver);
-    notificationService.complaintStatusUpdated(complaint.userId, complaint._id, status);
-    notificationService.unsubscribe(studentObserver);
     res.json(updated);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -131,42 +124,22 @@ const updateComplaintStatus = async (req, res) => {
 
 // Update complaints by staff
 const updateComplaintStatusByStaff = async (req, res) => {
-    const { status } = req.body;
-    const complaintId = req.params.id;
-
-    // Validate the incoming status
-    const allowedStatuses = ['received', 'resolving', 'closed'];
-    if (!status || !allowedStatuses.includes(status)) {
-        return res.status(400).json({ message: `Invalid status. Please use one of: ${allowedStatuses.join(', ')}` });
-    }
-
     try {
-        const staffDepartment = req.user.department;
-        if (!staffDepartment) {
-            return res.status(403).json({ message: "Access denied: You are not assigned to a department." });
-        }
+      const {status} = req.body;
+      const complaint = await Complaint.findById(req.params.id);
+      if (!complaint) return res.status(404).json({message: "Complaint not found"});
 
-        const complaint = await Complaint.findById(complaintId);
-        if (!complaint) {
-            return res.status(404).json({ message: "Complaint not found." });
-        }
+      if (complaint.category !== req.user.department){
+        return res.status(403).json({message: "Forbidden: You can only update complaints in your department."});
+      }
 
-        // SECURITY CHECK: Ensures staff can only modify complaints in their own department.
-        if (complaint.category !== staffDepartment) {
-            return res.status(403).json({ message: "Forbidden: You can only update complaints within your own department." });
-        }
-
-        // Update the status and completion fields
-        complaint.status = status;
-        complaint.completed = (status === 'closed'); // A shorter way to write the if/else
-
-        const updatedComplaint = await complaint.save();
-
-        const studentObserver = new UserObserver(complaint.userId);
-        notificationService.subscribe(studentObserver);
-        notificationService.complaintStatusUpdated(complaint.userId, complaint._id, status);
-        notificationService.unsubscribe(studentObserver);
-        res.json(updatedComplaint);
+      const wrapper = new ComplaintWrapper(complaint);
+      if (status){
+        await wrapper.updateStatus(status);
+      }
+      
+      const updatedComplaint = await complaint.save();
+      res.json(updatedComplaint);
 
     } catch (error) {
         console.error("Error updating complaint status:", error.message);

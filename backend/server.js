@@ -40,7 +40,7 @@ if (require.main === module) {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-const adminObserver = new AdminObserver();
-notificationService.subscribe(adminObserver);
+// const adminObserver = new AdminObserver();
+// notificationService.subscribe(adminObserver);
 
 module.exports = app;

@@ -177,9 +177,9 @@ const StaffDashboard = () => {
           <select value={selectedComplaint.status}
           onChange={(e) => handleUpdateComplaint(selectedComplaint._id, e.target.value)}
           className="border p-1 rounded mr-2">
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
+            <option value="received">Received</option>
+            <option value="resolving">Resolving</option>
+            <option value="closed">Closed</option>
           </select>
 
           <button className='px-2 py-1 bg-gray-500 text-white rounded'
