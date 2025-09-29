@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   const [sortDir, setSortDir] = useState('desc');
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
-  const [paneMode, setPaneMode] = useState('edit'); // 'edit' | 'feedback'
+  const [paneMode, setPaneMode] = useState('edit');
 
   const orderCategories = (arr) => {
     const clean = Array.from(new Set((arr || []).map((s) => (s ?? '').toString().trim()).filter(Boolean)));
@@ -52,7 +52,6 @@ export default function AdminDashboard() {
     setLoading(true);
     setErr('');
     try {
-      // Server returns a sorted array based on sortKey + dir
       const data = await adminGetComplaints({ sort: sortKey, dir });
       setAll(data || []);
     } catch (e) {
@@ -65,17 +64,16 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     (async () => {
-      await load('date', 'desc'); // newest first by default
+      await load('date', 'desc');
       await refreshMeta();
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSort = async (key) => {
     const nextDir = activeSort === key ? (sortDir === 'asc' ? 'desc' : 'asc') : (key === 'date' ? 'desc' : 'asc');
     setActiveSort(key);
     setSortDir(nextDir);
-    await load(key, nextDir); // ask server to sort
+    await load(key, nextDir);
   };
 
   const onRowClick = async (row, metaAction) => {
@@ -139,26 +137,46 @@ export default function AdminDashboard() {
       <div style={{ height: 16 }} />
 
       <div id="editor-pane">
-        {paneMode === 'feedback' ? (
-          <Feedback
-            readOnly
-            initial={{
-              title: sel?.title ?? '',
-              rating: sel?.feedback?.rating ?? '',
-              text: sel?.feedback?.text ?? '',
-            }}
-            onClose={() => setPaneMode('edit')}
-          />
+        {sel ? (
+          paneMode === 'feedback' ? (
+            <Feedback
+              readOnly
+              initial={{
+                title: sel?.title ?? '',
+                rating: sel?.feedback?.rating ?? '',
+                text: sel?.feedback?.text ?? '',
+              }}
+              onClose={() => setPaneMode('edit')}
+            />
+          ) : (
+            <ComplaintEditor
+              value={sel}
+              onSave={onSave}
+              onClear={onClear}
+              onDelete={onDelete}
+              height={LOWER_H}
+              categories={meta.categories}
+              locations={meta.locations}
+            />
+          )
         ) : (
-          <ComplaintEditor
-            value={sel}
-            onSave={onSave}
-            onClear={onClear}
-            onDelete={onDelete}
-            height={LOWER_H}
-            categories={meta.categories}
-            locations={meta.locations}
-          />
+          <div
+            style={{
+              height: LOWER_H,
+              border: '1px dashed #ddd',
+              borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#626262ff',
+              fontWeight: 700,
+              fontSize: 18,
+              textAlign: 'center',
+              padding: '0 16px',
+            }}
+          >
+            Select a complaint to edit or feedback to view from the list above.
+          </div>
         )}
       </div>
     </div>

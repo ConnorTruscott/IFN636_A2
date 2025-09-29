@@ -156,7 +156,6 @@ const getComplaintMeta = async (_req, res) => {
   }
 };
 
-// get single complaint by id — include studentName & assignedStaffName
 const adminGetComplaintById = async (req, res) => {
   try {
     const r = await Complaint.findById(req.params.id)

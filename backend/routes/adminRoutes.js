@@ -19,7 +19,7 @@ router.route('/staff')
 router.delete('/staff/:id',protect, isAdmin, deleteStaff);
 router.put('/staff/:id/department', protect, isAdmin, updateStaffDepartment);
 
-// Meta (categories from DB + preset locations)
+// Meta 
 router.get('/complaints/meta', protect, isAdmin, getComplaintMeta);
 
 // Complaints (admin)
@@ -30,7 +30,7 @@ router.delete('/complaints/:id', protect, isAdmin, adminDeleteComplaint);
 
 
 
-// Category CRUD (admin manages categories)
+// Category CRUD 
 router.get('/categories', protect, isAdmin, listCategories);
 router.post('/categories', protect, isAdmin, createCategory);
 router.put('/categories/:id', protect, isAdmin, updateCategory);

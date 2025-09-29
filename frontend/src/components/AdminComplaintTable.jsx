@@ -67,7 +67,6 @@ export default function AdminComplaintTable({
             <TH id="assignedStaff">Assigned Staff</TH>
             <TH id="status">Status</TH>
             <TH id="date">Date</TH>
-            {/* Feedback column: not sortable */}
             <th
               style={{
                 textAlign: 'left',
