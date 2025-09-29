@@ -31,6 +31,7 @@ export default function ComplaintEditor({
     onDelete?.(reason);
   };
 
+  // styles (match Create Complaint / table buttons)
   const input = {
     width:'100%', padding:'8px', border:'1px solid #ddd', borderRadius:6, background:'#fff'
   };
@@ -42,6 +43,7 @@ export default function ComplaintEditor({
   };
 
   const categoryOptions = useMemo(() => {
+    // clean & order A→Z with “Other” last
     const clean = Array.from(new Set(
       (categories || []).map(x => (x ?? '').toString().trim()).filter(Boolean)
     ));
@@ -51,7 +53,7 @@ export default function ComplaintEditor({
     const hasOther = clean.some(s => s.toLowerCase() === 'other');
     const ordered = hasOther ? [...withoutOther, 'Other'] : withoutOther;
 
-
+    // ensure current shows even if meta is stale or missing
     const current = (form.category ?? '').toString().trim();
     if (current && !ordered.includes(current)) {
       return [current, ...ordered];
@@ -95,6 +97,7 @@ export default function ComplaintEditor({
 
         <div style={group}>
           <label style={label}>Location</label>
+          {/* Admin cannot change location per backend rule; keep read-only */}
           <select
             name="location"
             value={form.location}
