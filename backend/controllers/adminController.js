@@ -5,6 +5,8 @@ const Complaint = require('../models/Complaint');
 const Department = require('../models/Department');
 const PRESET_LOCATIONS = require('../config/locations');
 const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy'); 
+const notificationService = require('../design_patterns/NotificationService');
+const {UserObserver} = require('../design_patterns/NotificationObservers');
 
 const createStaff = async (req, res) => {
   try {
@@ -189,6 +191,13 @@ const adminUpdateComplaint = async (req, res) => {
     if (date !== undefined) complaint.date = date;
 
     const updated = await complaint.save();
+
+    if (status !== undefined){
+      const studentObserver = new UserObserver(complaint.userId);
+      notificationService.subscribe(studentObserver)
+      notificationService.complaintStatusUpdated(complaint.userId, complaint._id, complaint.status);
+      notificationService.unsubscribe(studentObserver);
+    }
     res.json(updated);
   } catch (error) {
     res.status(500).json({ message: error.message });

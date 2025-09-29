@@ -21,7 +21,7 @@ class NotificationService {
         this.notify({
             type: "COMPLAINT_CREATED",
             message: `A new complaint has been created by ${userName}.`,
-            recipiant: "Admin",
+            recipient: "Admin",
             timestamp: new Date()
         });
     }
@@ -30,7 +30,7 @@ class NotificationService {
         this.notify({
             type: "COMPLAINT_RESOLVED",
             message: `Your complaint ${complaintId} has been resolved.`,
-            recipiant: user,
+            recipient: user,
             timestamp: new Date()
         });
     }
@@ -39,7 +39,7 @@ class NotificationService {
         this.notify({
             type: "FEEDBACK_SUBMITTED",
             message: `New feedback received (ID: ${feedbackId}).`,
-            recipiant: staff,
+            recipient: staff,
             timestamp: new Date()
         });
     }
@@ -48,7 +48,25 @@ class NotificationService {
         this.notify({
             type: "USER_REGISTERED",
             message: `New ${user.role} registered: ${user.name} (${user.email}).`,
-            recipiant: "Admin",
+            recipient: "Admin",
+            timestamp: new Date()
+        });
+    }
+
+    complaintAssigned(staffId, complaintId){
+        this.notify({
+            type: "COMPLAINT_ASSIGNED",
+            message: `You have been assigned complaint ${complaintId}.`,
+            recipient: staffId,
+            timestamp: new Date()
+        });
+    }
+
+    complaintStatusUpdated(studentId, complaintId, status){
+        this.notify({
+            type: "COMPLAINT_STATUS_UPDATED",
+            message: `Your complaint ${complaintId} is now marked as ${status}.`,
+            recipient: studentId,
             timestamp: new Date()
         });
     }

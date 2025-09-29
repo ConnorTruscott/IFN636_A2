@@ -2,6 +2,9 @@ const Complaint = require('../models/Complaint');
 const notificationService = require('../design_patterns/NotificationService');
 const { compare } = require('bcrypt');
 const User = require('../models/User');
+const {UserObserver, StaffObserver} = require('../design_patterns/NotificationObservers');
+const { Staff } = require('../models/UserRoles');
+
 
 
 // READ
@@ -114,6 +117,11 @@ const updateComplaintStatus = async (req, res) => {
 
     complaint.status = status;
     const updated = await complaint.save();
+
+    const studentObserver = new UserObserver(complaint.userId);
+    notificationService.subscribe(studentObserver);
+    notificationService.complaintStatusUpdated(complaint.userId, complaint._id, status);
+    notificationService.unsubscribe(studentObserver);
     res.json(updated);
 
   } catch (error) {
@@ -153,6 +161,11 @@ const updateComplaintStatusByStaff = async (req, res) => {
         complaint.completed = (status === 'closed'); // A shorter way to write the if/else
 
         const updatedComplaint = await complaint.save();
+
+        const studentObserver = new UserObserver(complaint.userId);
+        notificationService.subscribe(studentObserver);
+        notificationService.complaintStatusUpdated(complaint.userId, complaint._id, status);
+        notificationService.unsubscribe(studentObserver);
         res.json(updatedComplaint);
 
     } catch (error) {
@@ -278,6 +291,14 @@ const saveFeedback = async (req, res) => {
     }
 
     const updated = await complaint.save();
+
+    const staff = await User.findOne({department: complaint.category, role: "Staff"});
+    if (staff) {
+      const staffObserver = new StaffObserver(staff._id);
+      notificationService.subscribe(staffObserver);
+      notificationService.feedbackSubmitted(staff._id, feedback._id);
+      notificationService.unsubscribe(staffObserver);
+    }
     res.json(updated);
   } catch (error) {
     res.status(500).json({ message: error.message });
