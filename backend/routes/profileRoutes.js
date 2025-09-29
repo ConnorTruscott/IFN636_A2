@@ -7,7 +7,6 @@ const { getProfileView, applyProfileUpdate, normalizeRole } =
 const { protect } = require('../middleware/authMiddleware');
 const User = require('../models/User');
 
-// GET: role-specific view + values
 router.get('/me', protect, async (req, res, next) => {
   try {
     const id = req.user._id || req.user.id;
@@ -20,10 +19,7 @@ router.get('/me', protect, async (req, res, next) => {
     const values = {};
     for (const f of view) {
       let v = userDoc[f.key];
-      // Staff expects "category" but DB uses "department"
-      if (f.key === 'category' && (v === undefined || v === null)) {
-        v = userDoc.department;
-      }
+      if (f.key === 'category' && (v === undefined || v === null)) v = userDoc.department;
       values[f.key] = v ?? '';
     }
 
@@ -31,14 +27,12 @@ router.get('/me', protect, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// PATCH: only allowed fields (Admin: name; Student: name, campus; Staff: none)
 router.patch('/me', protect, async (req, res, next) => {
   try {
     const id = req.user._id || req.user.id;
     const userDoc = await User.findById(id);
     if (!userDoc) return res.status(404).json({ message: 'User not found' });
 
-    // keep original casing in DB, but choose strategy by normalized role
     const { updatedDoc, changes } = applyProfileUpdate({
       actorDoc: userDoc,
       targetDoc: userDoc,
