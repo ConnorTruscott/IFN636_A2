@@ -6,7 +6,8 @@ const connectDB = require('./config/db');
 const notificationService = require('./design_patterns/NotificationService');
 const {AdminObserver, UserObserver, StaffObserver} = require('./design_patterns/NotificationObservers');
 const analyticsRoutes = require('./routes/analyticsRoute');
-const staffRoutes = require('./routes/staffRoutes'); // <-- 1. ADD THIS IMPORT
+const staffRoutes = require('./routes/staffRoutes'); 
+const profileRoutes = require('./routes/profileRoutes');
 
 dotenv.config();
 
@@ -29,6 +30,8 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/departments', require('./routes/departmentRoutes'));
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/profile', profileRoutes); 
+
 
 // Export the app object for testing or start server if run directly
 if (require.main === module) {
@@ -37,7 +40,7 @@ if (require.main === module) {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-const adminObserver = new AdminObserver();
-notificationService.subscribe(adminObserver);
+// const adminObserver = new AdminObserver();
+// notificationService.subscribe(adminObserver);
 
 module.exports = app;

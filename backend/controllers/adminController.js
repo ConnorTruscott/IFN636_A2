@@ -1,22 +1,46 @@
 const User = require('../models/User');
 const { Admin } = require('../models/UserRoles');
-const AdminProxy = require('../design_patterns/adminProxy');
+// const AdminProxy = require('../design_patterns/adminProxy');
 const Complaint = require('../models/Complaint');
 const Department = require('../models/Department');
 const PRESET_LOCATIONS = require('../config/locations');
 const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy'); 
+const notificationService = require('../design_patterns/NotificationService');
+const {UserObserver} = require('../design_patterns/NotificationObservers');
+const ComplaintWrapper = require('../design_patterns/complaintStatesWrapper');
+
+// const createStaff = async (req, res) => {
+//   try {
+//     const admin = new Admin(req.user);
+//     // const proxy = new AdminProxy(admin);
+
+//     const { name, email, password, phone, campus, department } = req.body;
+
+//     const newStaff = await proxy.createStaff(
+//       { name, email, password, phone, campus, role: 'Staff' },
+//       department,
+//       req.user
+//     );
+
+//     const savedStaff = await User.create({ ...newStaff.user, role: 'Staff', department });
+
+//     const NotificationService = require('../design_patterns/NotificationService');
+//     NotificationService.userRegistered(savedStaff);
+
+//     res.status(201).json(savedStaff);
+//   } catch (error) {
+//     res.status(403).json({ message: error.message });
+//   }
+// };
 
 const createStaff = async (req, res) => {
   try {
-    const admin = new Admin(req.user);
-    const proxy = new AdminProxy(admin);
-
+    const admin = new Admin(req.user); 
     const { name, email, password, phone, campus, department } = req.body;
 
-    const newStaff = await proxy.createStaff(
+    const newStaff = await admin.createStaff(
       { name, email, password, phone, campus, role: 'Staff' },
-      department,
-      req.user
+      department
     );
 
     const savedStaff = await User.create({ ...newStaff.user, role: 'Staff', department });
@@ -26,7 +50,7 @@ const createStaff = async (req, res) => {
 
     res.status(201).json(savedStaff);
   } catch (error) {
-    res.status(403).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -74,50 +98,38 @@ const updateStaffDepartment = async (req, res) => {
   }
 };
 
-// list all complaints (newest first) — populate student name only
-const getAllComplaints = async (_req, res) => {
+const getAllComplaints = async (req, res) => {
   try {
-    // Load complaints + student
+    const sortKey = String(req.query.sort || 'date');
+    const dir = String(req.query.dir || 'desc').toLowerCase() === 'asc' ? 'asc' : 'desc';
+
     const rows = await Complaint.find()
-      .sort({ date: -1, createdAt: -1 })
-      .populate('userId', 'fullname name') // student
+      .populate('userId', 'fullname name')
       .lean();
 
-    // Enrich each complaint with assignedStaffName
-    const result = await Promise.all(rows.map(async (r) => {
+    const enriched = await Promise.all(rows.map(async (r) => {
       let assignedStaffName = '';
-
-      // If your schema has assignedStaff and data is present, try populate-on-demand
       if (r.assignedStaff) {
         const staff = await User.findById(r.assignedStaff, 'fullname name').lean();
-        if (staff) {
-          assignedStaffName = staff.fullname || staff.name || '';
-        }
+        if (staff) assignedStaffName = staff.fullname || staff.name || '';
       }
-
-      // Fallback: find any staff in this complaint's department (category)
       if (!assignedStaffName && r.category) {
-        const staff = await User.findOne(
-          { role: 'Staff', department: r.category },
-          'fullname name'
-        ).lean();
-        if (staff) {
-          assignedStaffName = staff.fullname || staff.name || '';
-        }
+        const staff = await User.findOne({ role: 'Staff', department: r.category }, 'fullname name').lean();
+        if (staff) assignedStaffName = staff.fullname || staff.name || '';
       }
-
       const studentName = r.userId?.fullname || r.userId?.name || '';
       return { ...r, studentName, assignedStaffName };
     }));
 
-    res.json(result);
+    const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy');
+    const ctx = new SortContext(makeStrategy(sortKey));
+    const sorted = ctx.execute(enriched, dir);
+
+    res.json(sorted);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
 
 const getComplaintMeta = async (_req, res) => {
   try {
@@ -144,7 +156,6 @@ const getComplaintMeta = async (_req, res) => {
   }
 };
 
-// get single complaint by id — include studentName & assignedStaffName
 const adminGetComplaintById = async (req, res) => {
   try {
     const r = await Complaint.findById(req.params.id)
@@ -185,8 +196,14 @@ const adminUpdateComplaint = async (req, res) => {
     if (title !== undefined) complaint.title = title;
     if (category !== undefined) complaint.category = category;
     if (description !== undefined) complaint.description = description;
-    if (status !== undefined) complaint.status = status;
+    //if (status !== undefined) complaint.status = status;
     if (date !== undefined) complaint.date = date;
+
+    const wrapper = new ComplaintWrapper(complaint);
+
+    if (status) {
+      await wrapper.updateStatus(status);
+    }
 
     const updated = await complaint.save();
     res.json(updated);

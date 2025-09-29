@@ -1,11 +1,10 @@
-// frontend/src/components/AdminComplaintTable.jsx
 export default function AdminComplaintTable({
   complaints,
   height = '44vh',
   onRowClick,
   onSort,
   activeSort,
-  sortDir = 'asc', // optional, harmless if not passed
+  sortDir = 'asc',
 }) {
   const fmt = (v) => {
     if (!v) return '';
@@ -15,8 +14,8 @@ export default function AdminComplaintTable({
 
   const TH = ({ id, children }) => {
     const isActive = activeSort === id;
-    const icon = isActive ? (sortDir === 'asc' ? '▲' : '▼') : '▼'; // default ▼ as requested
-    const iconColor = isActive ? '#333' : '#555'; // dark grey
+    const icon = isActive ? (sortDir === 'asc' ? '▲' : '▼') : '▼';
+    const iconColor = isActive ? '#333' : '#adadadff';
 
     return (
       <th
@@ -68,8 +67,18 @@ export default function AdminComplaintTable({
             <TH id="assignedStaff">Assigned Staff</TH>
             <TH id="status">Status</TH>
             <TH id="date">Date</TH>
-            {/* ADDED: Feedback column */}
-            <TH id="feedback">Feedback</TH>
+            <th
+              style={{
+                textAlign: 'left',
+                borderBottom: '1px solid #eee',
+                padding: 8,
+                whiteSpace: 'nowrap',
+                fontWeight: 600,
+                color: '#222',
+              }}
+            >
+              Feedback
+            </th>
             <th style={{ textAlign: 'left', borderBottom: '1px solid #eee', padding: 8, whiteSpace: 'nowrap' }}>
               Action
             </th>
@@ -85,8 +94,6 @@ export default function AdminComplaintTable({
               <TD>{c.assignedStaffName || '-'}</TD>
               <TD style={{ textTransform: 'capitalize' }}>{c.status}</TD>
               <TD>{fmt(c.date || c.createdAt)}</TD>
-
-              {/* ADDED: Feedback cell (View when closed, else '-') */}
               <TD>
                 {c.status === 'closed' ? (
                   <button
@@ -100,7 +107,6 @@ export default function AdminComplaintTable({
                   '-'
                 )}
               </TD>
-
               <td style={{ padding: 8, whiteSpace: 'nowrap' }}>
                 <button
                   onClick={() => onRowClick?.(c)}
@@ -133,8 +139,8 @@ export default function AdminComplaintTable({
           ))}
           {!complaints.length && (
             <tr>
-              {/* NOTE: +1 colSpan to include Feedback column */}
-              <td colSpan="10" style={{ padding: 12, color: '#777' }}>
+              {/* 9 columns total */}
+              <td colSpan="9" style={{ padding: 12, color: '#777' }}>
                 No complaints found.
               </td>
             </tr>
