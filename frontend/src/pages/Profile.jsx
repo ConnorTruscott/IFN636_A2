@@ -48,8 +48,8 @@ const Profile = () => {
   const { user } = useAuth();
 
   const [role, setRole] = useState('');
-  const [view, setView] = useState([]);     // [{ key, label, editable }]
-  const [values, setValues] = useState({}); // { key: value }
+  const [view, setView] = useState([]);    
+  const [values, setValues] = useState({}); 
   const [initial, setInitial] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -81,7 +81,6 @@ const Profile = () => {
   const onClear  = () => setValues(initial);
 
   const onSave = async () => {
-    // Only send changed & editable fields
     const payload = {};
     for (const f of view) {
       if (f.editable && values[f.key] !== initial[f.key]) {
@@ -150,10 +149,6 @@ const Profile = () => {
           );
         })}
 
-        {/* Buttons:
-            - Admin: Update + Clear
-            - Student: Save + Clear
-            - Staff: none */}
         {view.some(f => f.editable) ? (
           <div className="flex gap-3">
             <button

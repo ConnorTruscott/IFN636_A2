@@ -1,8 +1,7 @@
-// frontend/src/pages/AdminDashboard.jsx
 import { useEffect, useState } from 'react';
 import AdminComplaintTable from '../components/AdminComplaintTable';
 import ComplaintEditor from '../components/ComplaintEditor';
-import Feedback from '../pages/Feedback'; // ADDED: reuse as read-only viewer
+import Feedback from '../pages/Feedback';
 import {
   adminGetComplaints,
   adminGetComplaint,
@@ -19,7 +18,7 @@ export default function AdminDashboard() {
   const [sel, setSel] = useState(null);
   const [meta, setMeta] = useState({ categories: [], locations: [] });
   const [activeSort, setActiveSort] = useState('date');
-  const [sortDir, setSortDir] = useState('desc'); // keep your existing default if any
+  const [sortDir, setSortDir] = useState('desc');
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [paneMode, setPaneMode] = useState('edit'); // 'edit' | 'feedback'
@@ -53,9 +52,9 @@ export default function AdminDashboard() {
     setLoading(true);
     setErr('');
     try {
-      // your backend currently ignores sort & dir; leaving the call shape intact for future
+      // Server returns a sorted array based on sortKey + dir
       const data = await adminGetComplaints({ sort: sortKey, dir });
-      setAll(data);
+      setAll(data || []);
     } catch (e) {
       console.error(e);
       setErr('Failed to load complaints.');
@@ -66,17 +65,17 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     (async () => {
-      await load('date', 'desc');
+      await load('date', 'desc'); // newest first by default
       await refreshMeta();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSort = async (key) => {
-    const nextDir = activeSort === key ? (sortDir === 'asc' ? 'desc' : 'asc') : 'asc';
+    const nextDir = activeSort === key ? (sortDir === 'asc' ? 'desc' : 'asc') : (key === 'date' ? 'desc' : 'asc');
     setActiveSort(key);
     setSortDir(nextDir);
-    await load(key, nextDir);
+    await load(key, nextDir); // ask server to sort
   };
 
   const onRowClick = async (row, metaAction) => {
@@ -85,20 +84,19 @@ export default function AdminDashboard() {
       if (!reason) return;
       await adminDeleteComplaint(row._id, reason);
       setSel(null);
-      await load();
+      await load(activeSort, sortDir);
       await refreshMeta();
       return;
     }
 
     if (metaAction?.mode === 'viewFeedback') {
-      const fresh = await adminGetComplaint(row._id); // ensure feedback present
+      const fresh = await adminGetComplaint(row._id);
       setSel(fresh);
       setPaneMode('feedback');
       document.getElementById('editor-pane')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
 
-    // default: edit
     const fresh = await adminGetComplaint(row._id);
     setSel(fresh);
     setPaneMode('edit');
@@ -110,7 +108,7 @@ export default function AdminDashboard() {
     await adminUpdateComplaint(sel._id, form);
     const fresh = await adminGetComplaint(sel._id);
     setSel(fresh);
-    await load();
+    await load(activeSort, sortDir);
     await refreshMeta();
     window.alert('Saved.');
   };
@@ -121,21 +119,19 @@ export default function AdminDashboard() {
     if (!sel) return;
     await adminDeleteComplaint(sel._id, reason);
     setSel(null);
-    await load();
+    await load(activeSort, sortDir);
     await refreshMeta();
   };
 
   return (
     <div style={{ padding: 16 }}>
-      <h2>Dashboard</h2>
-
       <AdminComplaintTable
         complaints={all}
         height={UPPER_H}
         onRowClick={onRowClick}
         onSort={onSort}
         activeSort={activeSort}
-        sortDir={sortDir} // passes through but harmless if table ignores
+        sortDir={sortDir}
       />
       {loading && <div style={{ padding: '8px 0', color: '#777' }}>Loading…</div>}
       {err && <div style={{ padding: '8px 0', color: '#b00020' }}>{err}</div>}
