@@ -49,7 +49,7 @@ class StaffProfileStrategy extends ProfileStrategy {
 function normalizeRole(role) {
   return String(role || '').trim().toLowerCase();
 }
-
+ 
 function strategyForRole(role = '') {
   switch (normalizeRole(role)) {
     case 'admin':
