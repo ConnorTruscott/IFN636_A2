@@ -4,7 +4,7 @@ const { Admin } = require('../models/UserRoles');
 const Complaint = require('../models/Complaint');
 const Department = require('../models/Department');
 const PRESET_LOCATIONS = require('../config/locations');
-const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy'); 
+const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy');
 const notificationService = require('../design_patterns/NotificationService');
 const {UserObserver} = require('../design_patterns/NotificationObservers');
 const ComplaintWrapper = require('../design_patterns/complaintStatesWrapper');
@@ -121,7 +121,6 @@ const getAllComplaints = async (req, res) => {
       return { ...r, studentName, assignedStaffName };
     }));
 
-    const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy');
     const ctx = new SortContext(makeStrategy(sortKey));
     const sorted = ctx.execute(enriched, dir);
 
@@ -130,6 +129,7 @@ const getAllComplaints = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const getComplaintMeta = async (_req, res) => {
   try {
@@ -156,6 +156,7 @@ const getComplaintMeta = async (_req, res) => {
   }
 };
 
+// get single complaint by id — include studentName & assignedStaffName
 const adminGetComplaintById = async (req, res) => {
   try {
     const r = await Complaint.findById(req.params.id)
@@ -193,22 +194,48 @@ const adminUpdateComplaint = async (req, res) => {
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
 
-    if (title !== undefined) complaint.title = title;
-    if (category !== undefined) complaint.category = category;
-    if (description !== undefined) complaint.description = description;
-    //if (status !== undefined) complaint.status = status;
-    if (date !== undefined) complaint.date = date;
+    const changes = {};
 
-    const wrapper = new ComplaintWrapper(complaint);
-
-    if (status) {
-      await wrapper.updateStatus(status);
+    if (title !== undefined) {
+      const t = String(title).trim();
+      if (!t) return res.status(400).json({ message: 'Title cannot be empty' });
+      if (t !== complaint.title) changes.title = t;
     }
 
+    if (category !== undefined) {
+      const c = String(category).trim();
+      if (c && c !== complaint.category) changes.category = c;
+    }
+
+    if (description !== undefined) {
+      const d = String(description);
+      if (d !== complaint.description) changes.description = d;
+    }
+
+    if (date !== undefined && String(date).trim() !== '') {
+      const ms = new Date(date).getTime();
+      if (!Number.isFinite(ms)) return res.status(400).json({ message: 'Invalid date' });
+      const nd = new Date(ms);
+      if (!complaint.date || +complaint.date !== +nd) changes.date = nd;
+    }
+
+    if (typeof status === 'string' && status.trim()) {
+      const next = status.trim();
+      if (next !== complaint.status) {
+        const wrapper = new ComplaintWrapper(complaint);
+        try {
+          await wrapper.updateStatus(next);
+        } catch (err) {
+          return res.status(400).json({ message: err.message || 'Invalid status transition' });
+        }
+      }
+    }
+
+    Object.assign(complaint, changes);
     const updated = await complaint.save();
     res.json(updated);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
