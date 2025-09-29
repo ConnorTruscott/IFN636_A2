@@ -1,37 +1,34 @@
 class ProfileStrategy {
-  viewConfig(/* userDoc */) { return []; }            // [{ key, label, editable }]
-  sanitizeUpdate(/* input */) { return {}; }          // only permitted fields pass
-  authorize(actorDoc, targetDoc) {                    // self-update only
+  viewConfig() { return []; }
+  sanitizeUpdate() { return {}; }
+  authorize(actorDoc, targetDoc) {
     if (!actorDoc || !targetDoc || String(actorDoc._id) !== String(targetDoc._id)) {
       throw new Error('Forbidden');
     }
   }
 }
 
-/** 3) ADMIN — update Name; Email view-only; buttons: Update / Clear */
 class AdminProfileStrategy extends ProfileStrategy {
   viewConfig() {
     return [
-      { key: 'name',  label: 'Name',  editable: true  },
+      { key: 'name',  label: 'Name',  editable: true },
       { key: 'email', label: 'Email', editable: false },
     ];
   }
   sanitizeUpdate(input) { return pick(input, ['name']); }
 }
 
-/** 4) STUDENT — update Name + Campus; Email view-only; buttons: Save / Clear */
 class StudentProfileStrategy extends ProfileStrategy {
   viewConfig() {
     return [
-      { key: 'name',   label: 'Name',   editable: true  },
+      { key: 'name',   label: 'Name',   editable: true },
       { key: 'email',  label: 'Email',  editable: false },
-      { key: 'campus', label: 'Campus', editable: true  },
+      { key: 'campus', label: 'Campus', editable: true },
     ];
   }
   sanitizeUpdate(input) { return pick(input, ['name', 'campus']); }
 }
 
-/** 5) STAFF — view-only Name, Email, Category; no buttons */
 class StaffProfileStrategy extends ProfileStrategy {
   viewConfig() {
     return [
@@ -43,28 +40,29 @@ class StaffProfileStrategy extends ProfileStrategy {
   sanitizeUpdate() { return {}; }
 }
 
-/** util */
-// ... keep existing classes exactly as you have them ...
+function pick(obj, keys) {
+  const out = {};
+  if (!obj) return out;
+  for (const k of keys) {
+    if (Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
+  }
+  return out;
+}
 
 function normalizeRole(role) {
   return String(role || '').trim().toLowerCase();
 }
- 
+
 function strategyForRole(role = '') {
   switch (normalizeRole(role)) {
-    case 'admin':
-      return new AdminProfileStrategy();
-    case 'student':
-      return new StudentProfileStrategy();
-    case 'staff':
-      return new StaffProfileStrategy();
-    default:
-      return new ProfileStrategy();
+    case 'admin':   return new AdminProfileStrategy();
+    case 'student': return new StudentProfileStrategy();
+    case 'staff':   return new StaffProfileStrategy();
+    default:        return new ProfileStrategy();
   }
 }
 
 function getProfileView({ targetDoc }) {
-  // ensure we select with the normalized role
   const role = normalizeRole(targetDoc.role);
   return strategyForRole(role).viewConfig(targetDoc);
 }
@@ -85,5 +83,5 @@ module.exports = {
   strategyForRole,
   getProfileView,
   applyProfileUpdate,
-  normalizeRole,             
+  normalizeRole,
 };
