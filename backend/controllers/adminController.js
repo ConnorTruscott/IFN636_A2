@@ -98,50 +98,38 @@ const updateStaffDepartment = async (req, res) => {
   }
 };
 
-// list all complaints (newest first) — populate student name only
-const getAllComplaints = async (_req, res) => {
+const getAllComplaints = async (req, res) => {
   try {
-    // Load complaints + student
+    const sortKey = String(req.query.sort || 'date');
+    const dir = String(req.query.dir || 'desc').toLowerCase() === 'asc' ? 'asc' : 'desc';
+
     const rows = await Complaint.find()
-      .sort({ date: -1, createdAt: -1 })
-      .populate('userId', 'fullname name') // student
+      .populate('userId', 'fullname name')
       .lean();
 
-    // Enrich each complaint with assignedStaffName
-    const result = await Promise.all(rows.map(async (r) => {
+    const enriched = await Promise.all(rows.map(async (r) => {
       let assignedStaffName = '';
-
-      // If your schema has assignedStaff and data is present, try populate-on-demand
       if (r.assignedStaff) {
         const staff = await User.findById(r.assignedStaff, 'fullname name').lean();
-        if (staff) {
-          assignedStaffName = staff.fullname || staff.name || '';
-        }
+        if (staff) assignedStaffName = staff.fullname || staff.name || '';
       }
-
-      // Fallback: find any staff in this complaint's department (category)
       if (!assignedStaffName && r.category) {
-        const staff = await User.findOne(
-          { role: 'Staff', department: r.category },
-          'fullname name'
-        ).lean();
-        if (staff) {
-          assignedStaffName = staff.fullname || staff.name || '';
-        }
+        const staff = await User.findOne({ role: 'Staff', department: r.category }, 'fullname name').lean();
+        if (staff) assignedStaffName = staff.fullname || staff.name || '';
       }
-
       const studentName = r.userId?.fullname || r.userId?.name || '';
       return { ...r, studentName, assignedStaffName };
     }));
 
-    res.json(result);
+    const { SortContext, makeStrategy } = require('../design_patterns/sortStrategy');
+    const ctx = new SortContext(makeStrategy(sortKey));
+    const sorted = ctx.execute(enriched, dir);
+
+    res.json(sorted);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
 
 const getComplaintMeta = async (_req, res) => {
   try {
