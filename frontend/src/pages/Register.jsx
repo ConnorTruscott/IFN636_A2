@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 
-const CAMPUS_OPTIONS = ['Garden Point', 'Kelvin Grove'];
+const CAMPUS_OPTIONS = ['Gardens Point', 'Kelvin Grove'];
 
 const CampusSelect = ({ value, onChange }) => {
   const [open, setOpen] = useState(false);
