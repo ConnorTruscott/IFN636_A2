@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 
-const CAMPUS_OPTIONS = ['Garden Point', 'Kelvin Grove'];
+const CAMPUS_OPTIONS = ['Gardens Point', 'Kelvin Grove'];
 
 const CampusSelect = ({ value, onChange, disabled }) => {
   const [open, setOpen] = useState(false);
