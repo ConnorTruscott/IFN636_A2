@@ -7,6 +7,6 @@ export default function AdminComplaintsSwitch() {
   const role =
     (user?.role || localStorage.getItem('role') || '').toLowerCase();
 
-  // Admin sees the new Dashboard; everyone else sees the existing Complaints page
+  // Only admin can sees the new Dashboard
   return role === 'admin' ? <AdminDashboard /> : <Complaints />;
 }
