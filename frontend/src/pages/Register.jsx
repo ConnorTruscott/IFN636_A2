@@ -60,7 +60,7 @@ const Register = () => {
     email: '',
     password: '',
     phone: '',
-    campus: 'Garden Point',
+    campus: 'Gardens Point',
   });
   const navigate = useNavigate();
 
