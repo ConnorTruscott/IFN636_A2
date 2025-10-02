@@ -137,9 +137,9 @@ export default function ComplaintEditor({
       </div>
 
       <div style={{ marginTop:16, display:'flex', gap:8 }}>
-        <button onClick={() => onSave?.(form)} disabled={disabled} style={btn.base}>Save</button>
-        <button onClick={onClear} style={btn.base}>Clear</button>
-        <button onClick={askDelete} disabled={disabled} style={btn.danger}>Delete</button>
+        <button onClick={() => onSave?.(form)} disabled={disabled} className='flex-1 bg-green-600 text-white p-1 rounded'>Save</button>
+        <button onClick={onClear} className='flex-1 bg-yellow-500 text-white p-1 rounded'>Clear</button>
+        <button onClick={askDelete} disabled={disabled} className='flex-1 bg-red-500 text-white p-1 rounded'>Delete</button>
       </div>
     </div>
   );

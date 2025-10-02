@@ -99,7 +99,8 @@ export default function AdminComplaintTable({
                   <button
                     onClick={() => onRowClick?.(c, { mode: 'viewFeedback' })}
                     title="View Feedback"
-                    style={{ border: '1px solid #ddd', borderRadius: 6, padding: '2px 8px', background: '#fff' }}
+                    //style={{ border: '1px solid #ddd', borderRadius: 6, padding: '2px 8px', background: '#fff' }}
+                    className="flex-1 bg-gray-700 text-white p-1 rounded"
                   >
                     View
                   </button>
@@ -111,26 +112,28 @@ export default function AdminComplaintTable({
                 <button
                   onClick={() => onRowClick?.(c)}
                   title="Edit"
-                  style={{
-                    marginRight: 8,
-                    border: '1px solid #ddd',
-                    borderRadius: 6,
-                    padding: '2px 8px',
-                    background: '#fff',
-                  }}
+                  // style={{
+                  //   marginRight: 8,
+                  //   border: '1px solid #ddd',
+                  //   borderRadius: 6,
+                  //   padding: '2px 8px',
+                  //   background: '#fff',
+                  // }}
+                  className="flex-1 bg-yellow-500 text-white p-1 rounded mr-1"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => onRowClick?.(c, { mode: 'delete' })}
                   title="Delete"
-                  style={{
-                    border: '1px solid #f5c2c7',
-                    color: '#b00020',
-                    borderRadius: 6,
-                    padding: '2px 8px',
-                    background: '#fff',
-                  }}
+                  // style={{
+                  //   border: '1px solid #f5c2c7',
+                  //   color: '#b00020',
+                  //   borderRadius: 6,
+                  //   padding: '2px 8px',
+                  //   background: '#fff',
+                  // }}
+                  className="flex-1 bg-red-500 text-white p-1 rounded ml-1"
                 >
                   Delete
                 </button>
