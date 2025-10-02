@@ -4,8 +4,6 @@ const { protect, isStaff } = require('../middleware/authMiddleware');
 
 const complaintController = require('../controllers/complaintController');
 
-console.log('Available functions from complaintController:', complaintController);
-
 const { 
     getComplaintsByCategory, 
     updateComplaintStatusByStaff 

@@ -1,6 +1,5 @@
 const Category = require('../models/Category');
 
-// list (sorted by name)
 const listCategories = async (_req, res) => {
   try {
     const cats = await Category.find().sort({ name: 1 });

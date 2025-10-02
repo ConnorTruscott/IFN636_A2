@@ -13,7 +13,6 @@ const getComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({ userId: req.user.id });
     res.json(complaints);
-    console.log('hi');
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -31,7 +30,6 @@ const getAllComplaints = async (req, res) => {
 
 // For staff to view complaints by catergry
 const getComplaintsByCategory = async (req, res) => {
-  console.log("Attempting to get complaints for staff member's department.");
   try {
       const staffDepartment = req.user.department;
 
@@ -39,9 +37,8 @@ const getComplaintsByCategory = async (req, res) => {
           // If the staff user has not been assigned a department by an admin.
           return res.status(403).json({ message: "Access denied: You are not assigned to a department." });
       }
-      console.log(`Fetching complaints for department: ${staffDepartment}`);
       const complaints = await Complaint.find({ category: staffDepartment })
-          .populate('userId', 'name email') // Fetches the name and email of the user who created the complaint.
+          .populate('userId', 'name email')
           .sort({ date: -1 });
 
       res.json(complaints);
@@ -64,7 +61,6 @@ const addComplaint = async (req, res) => {
       location,
       date: date ? new Date(date) : null,
       statusTimestamps: { received: new Date() }
-      // status defaults in schema
     });
     notificationService.complaintCreated(req.user.id, req.user.name, complaint._id)
 
@@ -175,7 +171,7 @@ const getClosedComplaints = async (req, res) => {
 };
 
 
-// GET FEEDBACKS (Student / Staff / Admin)
+// GET FEEDBACKS
 const getFeedbacks = async (req, res) => {
   try {
     if (req.user.role.toLowerCase() === 'student') {
@@ -198,7 +194,6 @@ const getFeedbacks = async (req, res) => {
     }
 
     if (req.user.role.toLowerCase() === 'staff') {
-      console.log("DEBUG STAFF:", req.user); 
       // Staff con only view the fedback related to their department
       const complaints = await Complaint.find({
         category: req.user.department,   

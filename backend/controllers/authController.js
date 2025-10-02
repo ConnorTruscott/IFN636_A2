@@ -57,7 +57,6 @@ const loginUser = async (req, res) => {
     }
 };
 
-// name, email, password, studentNumber, phone, campus
 const getProfile = async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
@@ -71,8 +70,6 @@ const getProfile = async (req, res) => {
         email: user.email,
         phone: user.phone,
         campus: user.campus,
-        // university: user.university,
-        // address: user.address,
       });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
@@ -90,8 +87,6 @@ const updateUserProfile = async (req, res) => {
         user.email = email || user.email;
         user.phone = phone || user.phone;
         user.campus = campus || user.campus;
-        // user.university = university || user.university;
-        // user.address = address || user.address;
 
         const updatedUser = await user.save();
         res.json({ id: updatedUser.id, studentNumber: updatedUser.studentNumber, name: updatedUser.name, email: updatedUser.email, phone: updatedUser.phone, campus: updatedUser.campus, token: generateToken(updatedUser.id) });

@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
-  // Guard in case provider isn't mounted yet
   const ctx = useAuth?.();
   const user = ctx?.user;
   const displayName = (user?.name || '').trim();

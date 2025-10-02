@@ -7,11 +7,6 @@ const router = express.Router();
 const upload = require('../utils/upload');             
 const Complaint = require('../models/Complaint');
 
-//router.route('/').get(protect, getComplaints).post(protect, addComplaint);
-//router.route('/:id').put(protect, updateComplaint).delete(protect, deleteComplaint);
-
-//const complaintController = new ComplaintControllerProxy(ComplaintController);
-
 
 router.route('/').get(protect, (req, res) => complaintController.getComplaints(req, res)).post(protect, (req, res) => complaintController.addComplaint(req, res));
 router.route('/:id').put(protect, (req, res) => complaintController.updateComplaint(req, res)).delete(protect, (req, res) => complaintController.deleteComplaint(req, res));
@@ -54,7 +49,6 @@ router.delete('/:id/photos/:filename', protect, async (req, res) => {
     complaint.photos = (complaint.photos || []).filter(p => p !== filename);
     const updated = await complaint.save();
 
-    // Optional: also remove file from disk
     const fs = require('fs');
     const path = require('path');
     const filePath = path.join(__dirname, '..', 'uploads', filename);

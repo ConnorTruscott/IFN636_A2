@@ -45,7 +45,6 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting formData:", formData);
     try {
       if (editingComplaint) {
         const response = await axiosInstance.put(`/api/complaints/${editingComplaint._id}`, formData, {

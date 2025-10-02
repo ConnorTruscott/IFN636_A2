@@ -14,7 +14,6 @@ const StaffFeedback = () => {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setFeedbacks(res.data || []);
-        console.log("Fetched feedbacks:", res.data);
       } catch {
         alert('Failed to load student feedback.');
       }

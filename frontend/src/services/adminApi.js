@@ -1,21 +1,3 @@
-// import http from './http';
-// import axiosInstance from '../axiosConfig';
-
-// export const adminGetComplaints = (params = {}) =>
-//   axiosInstance.get('/api/admin/complaints', { params }).then(r => r.data);
-
-// export const adminGetComplaint = (id) =>
-//   axiosInstance.get(`/api/admin/complaints/${id}`).then(r => r.data);
-
-// export const adminUpdateComplaint = (id, data) =>
-//   axiosInstance.put(`/api/admin/complaints/${id}`, data).then(r => r.data);
-
-// export const adminDeleteComplaint = (id, reason) =>
-//   axiosInstance.delete(`/api/admin/complaints/${id}`, { data: { reason } }).then(r => r.data);
-
-// export const adminGetComplaintMeta = () =>
-//   axiosInstance.get('/api/admin/complaints/meta').then(r => r.data);
-
 import axiosInstance from "../axiosConfig";
 
 export const adminGetComplaints = async (token, params = {}) => {

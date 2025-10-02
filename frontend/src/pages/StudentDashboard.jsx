@@ -32,7 +32,6 @@ export default function StudentDashboard() {
 
   return (
     <div className="p-6">
-      {/* Complaint Form on Top */}
       <ComplaintForm
         complaints={complaints}
         setComplaints={setComplaints}
@@ -40,7 +39,6 @@ export default function StudentDashboard() {
         setEditingComplaint={setEditingComplaint}
       />
 
-      {/* My Complaints Table */}
       <div className="bg-white p-6 shadow-md rounded mb-6">
         <h2 className="text-lg font-bold mb-2">My Complaints</h2>
         <p className="text-sm text-gray-500 mb-4">

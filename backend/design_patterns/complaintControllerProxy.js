@@ -7,24 +7,17 @@ class ComplaintControllerProxy {
     }
 
     async getComplaints(req, res){
-        console.log('hi3');
-        //Who can get what complaints?
         if (req.user.role === 'Admin'){
             return this.controller.getAllComplaints(req, res);
         }if (req.user.role === 'Staff'){
-            console.log('hi Staff fetch');
             return this.controller.getComplaintsByCategory(req, res);
         } else{
-            console.log('hi2');
             return this.controller.getComplaints(req, res);
         }
         
     }
 
     async addComplaint(req, res){
-        //Debug log
-        console.log("Proxy addComplaint req.body:", req.body);
-        //Assuming only students can get complaints
         if (req.user.role === 'Student'){
             return this.controller.addComplaint(req, res);
         }
@@ -32,16 +25,10 @@ class ComplaintControllerProxy {
     }
 
     async updateComplaint(req, res){
-        //Debug log
-        console.log("Proxy updateComplaint req.params.id:", req.params.id);
-        console.log("Proxy updateComplaint req.body:", req.body);
-        //Staff and admin can update every complaint - i.e resolved, handing to a staff, etc
         if (req.user.role === 'Admin'||req.user.role === 'Staff'){
             return this.controller.updateComplaint(req, res);
         }
-        //Student can only update the complaint they created
     if (req.user.role === 'Student') {
-            // Student can edit their own complaint
             const Complaint = require('../models/Complaint');
             try {
                 const complaint = await Complaint.findById(req.params.id);
@@ -63,7 +50,6 @@ class ComplaintControllerProxy {
 
     async deleteComplaint(req, res){
         //Only Admin can delete complaints
-        console.log('deleteComplaint called by:', req.user); //Debug
         if (req.user.role ==='Admin'){
             return this.controller.deleteComplaint(req, res);
         }
@@ -72,7 +58,6 @@ class ComplaintControllerProxy {
 
     async getClosedComplaints(req, res){
         //Staff and Admin can see all closed complaints, students only see their own
-        //Need to work out porper logic here
         if (req.user.role === 'Admin'||req.user.role === 'Staff'){
             return this.controller.getClosedComplaints(req, res);
         } else {

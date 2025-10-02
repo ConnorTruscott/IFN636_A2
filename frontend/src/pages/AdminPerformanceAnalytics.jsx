@@ -66,7 +66,6 @@ const AdminPerformanceAnalytics = () => {
       <h1 className="text-3xl font-bold mb-2">System Analytics</h1>
       <p className="text-gray-700 mb-6">Performance metrics and insights</p>
       
-      {/* Warning */}
       {analytics.warnings && analytics.warnings.length > 0 && (
         <div className="mb-6">
           <p className="font-bold text-xl mb-2">Warnings</p>
@@ -84,7 +83,6 @@ const AdminPerformanceAnalytics = () => {
       )}
 
 
-      {/* Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <SummaryCard title="Total Received" value={analytics.received} color="[#6b705c]" />
         <SummaryCard title="Total Resolving" value={analytics.resolving} color="[#cb997e]" />
@@ -93,7 +91,6 @@ const AdminPerformanceAnalytics = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Complaints by Category*/}
         <div className="bg-white p-4 rounded shadow col-span-2">
           <h2 className="text-2xl font-bold mb-4">Complaints by Category</h2>
           <ResponsiveContainer width="100%" height={350}>
@@ -119,9 +116,6 @@ const AdminPerformanceAnalytics = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-
-      {/* Rating Distribution */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-2xl font-bold mb-4">Rating Distribution</h2>
           <ResponsiveContainer width="100%" height={250}>
@@ -148,8 +142,6 @@ const AdminPerformanceAnalytics = () => {
             Average: {analytics.avgRating ? analytics.avgRating.toFixed(2) : 'No ratings yet'} / 5
           </p>
         </div>
-
-      {/* Complaints Trend */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-2xl font-bold mb-4">Complaints Trend</h2>
           <ResponsiveContainer width="100%" height={300}>
