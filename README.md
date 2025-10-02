@@ -1,7 +1,7 @@
 # Campus Complaint Management System
 
 A lightweight full-stack app for campuses to **create**, **view**, **update**, and **delete** complaints.  
-Supports user access, status tracking, post-resolution feedback, and ratings.  
+Supports user, staff, and admin access, status tracking, post-resolution feedback, and ratings.  
 Easy to deploy on cloud or locally.
 
 ---
@@ -11,8 +11,8 @@ Easy to deploy on cloud or locally.
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/cookieis-yummy/ifn636_a1
-cd ifn636_a1
+git clone https://github.com/ConnorTruscott/IFN636_A2
+cd IFN636_A2
 ```
 
 ### 2. Backend Setup
@@ -67,21 +67,22 @@ npm run
 
 ---
 
-##  Test Feedback Feature
+##  Admin Account Access
 
-- Feedback is activated when status is set to **"closed"**
-- To test:
+- There is a single admin account tied to this system
   - Login with:
-    - **Email:** feedback@test.com
-    - **Password:** 1
-  - Or manually set complaint status to "closed" in MongoDB
+    - **Email:** admin@admin
+    - **Password:** Admin
+  - It is HIGHLY reccomended to update and change these details.
 
 ---
 
 ##  Key Features
 
-- Secure sign-up / login, profile management
+- Secure sign-up / login, profile management for staff and students
 - Create, view, update, delete own complaints with attachments
+- Change the status of ongoing complaints as they are being worked on
+- View Staff and Complaint analytics
 - Post-resolution rating & comments
 
 ---
