@@ -1,9 +1,9 @@
 import axiosInstance from "../axiosConfig";
 
-export const adminGetComplaints = async (token, id) => {
+export const adminGetComplaints = async (token, params = {}) => {
   const { data } = await axiosInstance.get('/api/admin/complaints', {
-    id,
     headers: { Authorization: `Bearer ${token}` },
+    params,
   });
   return data;
 };
