@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Notification from './Notification';
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from '../axiosConfig';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -17,8 +17,10 @@ const Navbar = () => {
   // Navbar menu
   useEffect(() => {
     if (user?.role) {
-      axios
-        .get(`/api/navbar?role=${user.role.toLowerCase()}`)
+      axiosInstance
+        .get(`/api/navbar?role=${user.role.toLowerCase()}`, {
+          headers: {Authorization: `Bearer ${user.token}`}
+        })
         .then((res) => {
           setMenu(res.data.menu);
         })
