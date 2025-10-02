@@ -160,14 +160,16 @@ const Feedback = ({ readOnly = false, initial = null, onClose }) => {
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Feedback Details</label>
-              <textarea
-                value={formData.text}
-                disabled={readOnly || mode === 'view'}
-                onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-                className="w-full border rounded p-2"
-                rows={3}
-                placeholder="Enter your feedback..."
-              />
+                <textarea
+                  value={formData.text}
+                  disabled={readOnly || mode === 'view'}
+                  onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+                  className={`w-full border rounded p-2 ${
+                    (readOnly || mode === 'view') ? 'bg-gray-100' : ''
+                  }`}
+                  rows={3}
+                  placeholder="Enter your feedback..."
+                />
             </div>
             {!readOnly && mode === 'edit' && (
               <div className="flex gap-2">
