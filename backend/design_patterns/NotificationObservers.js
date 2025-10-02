@@ -4,7 +4,6 @@ const User = require('../models/User');
 class AdminObserver{
     async update(notification){
         console.log("Admin notified:", notification);
-        // TODO: save to db
         const admin = await User.findOne({role: 'Admin'});
         if (!admin) return;
 
