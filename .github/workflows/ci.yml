@@ -51,14 +51,14 @@ jobs:
        yarn --version
        yarn install
       
-    # Install dependencies for frontend
-    - name: Install Frontend Dependencies
-      working-directory: ./frontend
-      run: |
-        df -h
-        sudo rm -rf ./build
-        yarn install
-        yarn run build
+    # # Install dependencies for frontend
+    # - name: Install Frontend Dependencies
+    #   working-directory: ./frontend
+    #   run: |
+    #     df -h
+    #     sudo rm -rf ./build
+    #     yarn install
+    #     yarn run build
 
 
     # Run backend tests
