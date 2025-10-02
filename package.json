@@ -11,7 +11,8 @@
   "devDependencies": {
     "chai": "^5.1.2",
     "concurrently": "^7.6.0",
-    "mocha": "^11.0.1"
+    "mocha": "^11.0.1",
+    "sinon": "^21.0.0"
   },
   "author": "Complaint Manager Team",
   "license": "ISC",

@@ -33,7 +33,8 @@ const isStaff = (req, res, next) => {
     if (req.user && (req.user.role === 'Staff' )) {
         next();
     } else {
-        res.status(403).json({ message: 'Forbidden: Access is restricted to staff members.' });
+        res.status(403).json({ 
+            message: 'Forbidden: Access is restricted to staff members.' });
     }
 };
 
@@ -41,7 +42,8 @@ const isAdmin = (req, res, next) => {
     if (req.user && (req.user.role === 'Admin')) {
         next();
     } else {
-        res.status(403).json({ message: 'Forbidden: Access is restricted to staff members.' });
+        res.status(403).json({ 
+            message: 'Forbidden: Access is restricted to admin members.' });
     }
 };
 module.exports = {protect, isStaff, isAdmin};
