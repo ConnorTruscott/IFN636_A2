@@ -75,6 +75,21 @@ npm run
     - **Password:** Admin
   - It is HIGHLY reccomended to update and change these details.
 
+  ##  Staff Account Access
+
+- Here is a login for a staff account within the system
+  - Login with:
+    - **Email:** apple@a
+    - **Password:** apple
+
+  ##  Student Account Access
+
+- Here is a login for a student account within the system
+  - Login with:
+    - **Email:** test@test
+    - **Password:** test
+
+
 ---
 
 ##  Key Features
