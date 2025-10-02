@@ -30,11 +30,24 @@ describe('AnalyticsFacade and Services', () => {
                 .withArgs({ status: 'closed' }).resolves(2);
             
             const findStub = sinon.stub(Complaint, 'find');
-            findStub.withArgs().returns({ sort: sinon.stub().resolves(mockComplaints) }); // For TrendService
-            findStub.withArgs({ status: 'closed' }).resolves([mockComplaints[2], mockComplaints[3]]); // For RatingService
-            
-            // We can re-use the general find stub for CategoryService
-            findStub.withArgs().resolves(mockComplaints);
+
+
+            findStub.callsFake((query = {}) => {
+            let result;
+            if (query.status === 'closed'){
+                result = [mockComplaints[2], mockComplaints[3]];
+            } else {
+                result = mockComplaints;
+            }
+
+            const chainable = {
+                sort: () => chainable,
+                exec: async () => result,
+                then: (resolve) => Promise.resolve(result).then(resolve),
+            };
+
+            return chainable;
+            });
 
             // Now, create the facade and run the test
             const facade = new AnalyticsFacade(Complaint);
