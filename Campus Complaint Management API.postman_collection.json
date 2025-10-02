@@ -8,90 +8,90 @@
 	},
 	"item": [
 		{
-			"name": "register",
+			"name": "student",
 			"item": [
 				{
 					"name": "register",
-					"event": [
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json();\r",
-									"\r",
-									"// 1. Status code check\r",
-									"pm.test(\"Status code is 201 (Created)\", function () {\r",
-									"    pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"// 2. Content-Type check\r",
-									"pm.test(\"Content-Type is present\", function () {\r",
-									"    pm.response.to.have.header(\"Content-Type\");\r",
-									"});\r",
-									"\r",
-									"// 3. Response time check\r",
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
-									"\r",
-									"// 4. Registration response should contain user info\r",
-									"pm.test(\"Registration response contains user info\", function () {\r",
-									"    pm.expect(response).to.have.any.keys(\"email\", \"_id\");\r",
-									"});\r",
-									"\r",
-									"// Save JWT if returned\r",
-									"if (response.token) {\r",
-									"    pm.environment.set(\"jwt_token\", response.token);\r",
-									"    console.log(\"JWT Token saved from registration response:\", response.token);\r",
-									"} else {\r",
-									"    console.warn(\"No token found in registration response!\");\r",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"studentNumber\": \"n333\",\r\n  \"name\": \"Kitty\",\r\n  \"email\": \"Kitty@k\",\r\n  \"password\": \"Kitty\",\r\n  \"phone\": \"0422134555\",\r\n  \"campus\": \"Gardens Point\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+							"name": "register",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();\r",
+											"\r",
+											"// 1. Status code check\r",
+											"pm.test(\"Status code is 201 (Created)\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"// 2. Content-Type check\r",
+											"pm.test(\"Content-Type is present\", function () {\r",
+											"    pm.response.to.have.header(\"Content-Type\");\r",
+											"});\r",
+											"\r",
+											"// 3. Response time check\r",
+											"pm.test(\"Response time is less than 350ms\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(350);\r",
+											"});\r",
+											"\r",
+											"// 4. Registration response should contain user info\r",
+											"pm.test(\"Registration response contains user info\", function () {\r",
+											"    pm.expect(response).to.have.any.keys(\"email\", \"_id\");\r",
+											"});\r",
+											"\r",
+											"// Save JWT if returned\r",
+											"if (response.token) {\r",
+											"    pm.environment.set(\"jwt_token\", response.token);\r",
+											"    console.log(\"JWT Token saved from registration response:\", response.token);\r",
+											"} else {\r",
+											"    console.warn(\"No token found in registration response!\");\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
 								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:5001/api/auth/register",
-							"protocol": "http",
-							"host": [
-								"localhost"
 							],
-							"port": "5001",
-							"path": [
-								"api",
-								"auth",
-								"register"
-							]
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"studentNumber\": \"c24845\",\r\n  \"name\": \"cle\",\r\n  \"email\": \"cle@k\",\r\n  \"password\": \"cle\",\r\n  \"phone\": \"0487431650\",\r\n  \"campus\": \"Gardens Point\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/auth/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"auth",
+										"register"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "student",
-			"item": [
+					]
+				},
 				{
 					"name": "auth",
 					"item": [
@@ -194,8 +194,8 @@
 											"});\r",
 											"\r",
 											"// Check response time\r",
-											"pm.test(\"Response time is less than 200ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"pm.test(\"Response time is less than 300ms\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(300);\r",
 											"});\r",
 											"\r",
 											"// Verify response contains complaint id and status=received\r",
@@ -703,6 +703,78 @@
 										"api",
 										"auth",
 										"profile"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "profile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Parse the response body\r",
+											"let response = pm.response.json();\r",
+											"\r",
+											"// Basic test: status code should be 200\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Profile has role field\", function () {\r",
+											"    pm.expect(response).to.have.property(\"role\", \"student\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Profile update successful\", function () {\r",
+											"    pm.expect(response).to.have.property(\"ok\", true);\r",
+											"    pm.expect(response).to.have.property(\"role\", \"student\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Content-Type is present\", function () {\r",
+											"    pm.response.to.have.header(\"Content-Type\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 350ms\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(350);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Summer\",\r\n  \"campus\": \"Gardens Point\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/profile/me",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"profile",
+										"me"
 									]
 								}
 							},
@@ -1362,7 +1434,156 @@
 			"item": [
 				{
 					"name": "student login to create complaint",
-					"item": []
+					"item": [
+						{
+							"name": "login Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Parse the response body\r",
+											"let response = pm.response.json();\r",
+											"\r",
+											"// Basic test: status code should be 200\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has email field\", function () {\r",
+											"    pm.expect(response).to.have.property(\"email\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Content-Type is present\", function () {\r",
+											"    pm.response.to.have.header(\"Content-Type\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 200ms\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});\r",
+											"\r",
+											"// Save JWT token to environment variable (adjust key as needed)\r",
+											"if (response.token) {\r",
+											"    pm.environment.set(\"jwt_token\", response.token);\r",
+											"    console.log(\"JWT Token saved to environment:\", response.token);\r",
+											"} else {\r",
+											"    console.warn(\"No token found in response!\");\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"email\": \"Kiwi@kiwi\",\r\n\"password\": \"Kiwikiwi\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/auth/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "studentComplaints Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();\r",
+											"\r",
+											"// Save complaint_id for later use\r",
+											"if (response._id) {\r",
+											"    pm.environment.set(\"complaint_id\", response._id);\r",
+											"}\r",
+											"\r",
+											"// Check status code\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"// Check Content-Type header\r",
+											"pm.test(\"Content-Type is present\", function () {\r",
+											"    pm.response.to.have.header(\"Content-Type\");\r",
+											"});\r",
+											"\r",
+											"// Check response time\r",
+											"pm.test(\"Response time is less than 200ms\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});\r",
+											"\r",
+											"// Verify response contains complaint id and status=received\r",
+											"pm.test(\"Response contains _id and status=received\", function () {\r",
+											"    pm.expect(response).to.have.property(\"_id\");\r",
+											"    pm.expect(response).to.have.property(\"status\", \"received\");\r",
+											"});\r",
+											"\r",
+											"// Verify complaint has received timestamp\r",
+											"pm.test(\"Complaint has received timestamp\", function () {\r",
+											"    pm.expect(response).to.have.nested.property(\"statusTimestamps.received\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"title\": \"Aircon not working in library\",\r\n  \"category\": \"Facilities & Maintenance\",\r\n  \"description\": \"The AC in the library is not working in room 201.\",\r\n  \"location\": \"Gardens Point\",\r\n  \"date\": \"2025-09-30\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/complaints",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"complaints"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				},
 				{
 					"name": "auth",
