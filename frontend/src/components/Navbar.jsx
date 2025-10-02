@@ -53,7 +53,7 @@ const pathMap = {
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            {menu.map((item, index) => {
+            {(menu || []).map((item, index) => {
               
               if (item === "Notifications") {
                 return (
