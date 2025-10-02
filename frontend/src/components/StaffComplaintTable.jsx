@@ -55,7 +55,7 @@ export default function StaffComplaintTable({ complaints = [], height = '44vh', 
               <td style={{ ...styles.td, textTransform: 'capitalize' }}>{row.status}</td>
               <td style={styles.td}>{fmt(row.date)}</td>
               <td style={styles.td}>
-                <button onClick={() => onViewDetails(row)} style={styles.button}>
+                <button onClick={() => onViewDetails(row)} className='flex-1 bg-gray-700 text-white p-1 rounded'>
                   View Details
                 </button>
               </td>

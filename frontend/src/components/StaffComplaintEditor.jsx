@@ -85,7 +85,7 @@ export default function StaffComplaintEditor({ value, onSave, onClear, height = 
       </div>
 
       <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-        <button onClick={() => onSave?.(form)} disabled={disabled || isLocked} style={styles.btn.base}>Save Status</button>
+        <button onClick={() => onSave?.(form)} disabled={disabled || isLocked} className='flex-1 bg-green-600 text-white p-2 rounded'>Save Status</button>
         <button onClick={onClear} style={styles.btn.base}>Clear Selection</button>
       </div>
     </div>

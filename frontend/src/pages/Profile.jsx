@@ -154,7 +154,7 @@ const Profile = () => {
             <button
               type="button"
               onClick={onSave}
-              className="flex-1 bg-black text-white p-2 rounded"
+              className="flex-1 bg-green-600 text-white p-2 rounded"
               disabled={saving}
             >
               {saving ? 'Saving…' : (ctaByRole[role?.toLowerCase()] || 'Save')}

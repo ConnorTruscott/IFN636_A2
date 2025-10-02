@@ -118,7 +118,7 @@ const ComplaintForm = ({ complaints, setComplaints, editingComplaint, setEditing
         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
         className="w-full mb-4 p-2 border rounded"
       />
-      <button type="submit" className="w-full bg-black text-white p-2 rounded">
+      <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
         {editingComplaint ? 'Update' : 'Create'}
       </button>
     </form>
