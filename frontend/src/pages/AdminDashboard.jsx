@@ -9,6 +9,8 @@ import {
   adminDeleteComplaint,
   adminGetComplaintMeta,
 } from '../services/adminApi';
+import { useAuth } from '../context/AuthContext';
+
 
 const UPPER_H = '44vh';
 const LOWER_H = '44vh';
@@ -22,6 +24,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [paneMode, setPaneMode] = useState('edit');
+  const {user} = useAuth();
 
   const orderCategories = (arr) => {
     const clean = Array.from(new Set((arr || []).map((s) => (s ?? '').toString().trim()).filter(Boolean)));
@@ -34,7 +37,7 @@ export default function AdminDashboard() {
 
   const refreshMeta = async () => {
     try {
-      const m = await adminGetComplaintMeta();
+      const m = await adminGetComplaintMeta(user.token);
       const categories = orderCategories(m?.categories || []);
       const locations = (m?.locations || []).filter(Boolean);
       setMeta({ categories, locations });
@@ -52,7 +55,7 @@ export default function AdminDashboard() {
     setLoading(true);
     setErr('');
     try {
-      const data = await adminGetComplaints({ sort: sortKey, dir });
+      const data = await adminGetComplaints(user.token, { sort: sortKey, dir });
       setAll(data || []);
     } catch (e) {
       console.error(e);
@@ -80,7 +83,7 @@ export default function AdminDashboard() {
     if (metaAction?.mode === 'delete') {
       const reason = window.prompt('Please enter a reason for deletion:');
       if (!reason) return;
-      await adminDeleteComplaint(row._id, reason);
+      await adminDeleteComplaint(user.token, row._id, reason);
       setSel(null);
       await load(activeSort, sortDir);
       await refreshMeta();
@@ -88,14 +91,14 @@ export default function AdminDashboard() {
     }
 
     if (metaAction?.mode === 'viewFeedback') {
-      const fresh = await adminGetComplaint(row._id);
+      const fresh = await adminGetComplaint(user.token, row._id);
       setSel(fresh);
       setPaneMode('feedback');
       document.getElementById('editor-pane')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
 
-    const fresh = await adminGetComplaint(row._id);
+    const fresh = await adminGetComplaint(user.token, row._id);
     setSel(fresh);
     setPaneMode('edit');
     document.getElementById('editor-pane')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -103,8 +106,8 @@ export default function AdminDashboard() {
 
   const onSave = async (form) => {
     if (!sel) return;
-    await adminUpdateComplaint(sel._id, form);
-    const fresh = await adminGetComplaint(sel._id);
+    await adminUpdateComplaint(user.token, sel._id, form);
+    const fresh = await adminGetComplaint(user.token, sel._id);
     setSel(fresh);
     await load(activeSort, sortDir);
     await refreshMeta();
@@ -115,7 +118,7 @@ export default function AdminDashboard() {
 
   const onDelete = async (reason) => {
     if (!sel) return;
-    await adminDeleteComplaint(sel._id, reason);
+    await adminDeleteComplaint(user.token, sel._id, reason);
     setSel(null);
     await load(activeSort, sortDir);
     await refreshMeta();
