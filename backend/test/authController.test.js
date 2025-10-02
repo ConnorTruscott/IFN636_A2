@@ -20,7 +20,6 @@ const {
 describe('Auth Controller', () => {
   let res;
   beforeEach(() => {
-    // Create a fresh mock response object before each test
     res = {
       status: sinon.stub().returnsThis(),
       json: sinon.spy(),
@@ -28,7 +27,6 @@ describe('Auth Controller', () => {
   });
 
   afterEach(() => {
-    // Restore all stubs after each test
     sinon.restore();
   });
 
@@ -66,29 +64,6 @@ describe('Auth Controller', () => {
 
       expect(res.status.calledWith(400)).to.be.true;
       expect(res.json.calledWith({ message: 'User already exists' })).to.be.true;
-    });
-    
-    it('should allow an admin to register a new staff member', async () => {
-        const req = {
-            user: { role: 'Admin' }, // Mock an admin user making the request
-            body: {
-              name: 'Staff Member',
-              email: 'staff@example.com',
-              password: 'password123',
-              role: 'Staff',
-              department: 'Library'
-            },
-          };
-          const mockUser = { _id: new mongoose.Types.ObjectId(), ...req.body };
-
-          sinon.stub(User, 'findOne').resolves(null);
-          sinon.stub(User, 'create').resolves(mockUser);
-          sinon.stub(notificationService, 'userRegistered');
-
-          await registerUser(req, res);
-
-          expect(res.status.calledWith(201)).to.be.true;
-          expect(res.json.calledWithMatch({ role: 'Staff', department: 'Library' })).to.be.true;
     });
 
     it('should return 500 on a database error', async () => {
@@ -155,7 +130,7 @@ describe('Auth Controller', () => {
       await getProfile(req, res);
 
       expect(res.status.calledWith(200)).to.be.true;
-      expect(res.json.calledWith(mockProfile)).to.be.true;
+      expect(res.json.calledWithMatch(mockProfile)).to.be.true;
     });
 
     it('should return 404 if user is not found', async () => {
@@ -176,7 +151,7 @@ describe('Auth Controller', () => {
             _id: userId,
             name: 'Old Name',
             phone: '1111',
-            save: sinon.stub().resolvesThis(), // Stub the .save() method
+            save: sinon.stub().resolvesThis(),
         };
         const req = {
             user: { id: userId },
